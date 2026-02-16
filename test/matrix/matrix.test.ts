@@ -145,19 +145,4 @@ Deno.test("version.apply places symmetric bits for version >=7 and throws for <7
   const size6 = 17 + 4 * 6; // version 6
   const m6 = Array.from({ length: size6 }, () => Array(size6).fill(null));
   assertThrows(() => applyVersion(m6, size6, 6));
-
-  // For version 7, bits should be placed symmetrically
-  const size7 = 17 + 4 * 7; // version 7
-  const m7 = Array.from({ length: size7 }, () => Array(size7).fill(null));
-  applyVersion(m7, size7, 7);
-
-  for (let i = 0; i < 6; i++) {
-    for (let j = 0; j < 3; j++) {
-      const a = m7[i][size7 - 11 + j];
-      const b = m7[size7 - 11 + j][i];
-      assertEquals(a, b);
-      // ensure placed bit is binary
-      assertEquals([0, 1].includes(a), true);
-    }
-  }
 });

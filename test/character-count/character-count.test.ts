@@ -1,35 +1,59 @@
 // character_count_bits.test.ts
-import { assertEquals } from "jsr:@std/assert@1.0.13";
+import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.13";
 import { characterCount } from "../../src/character-count/character-count.ts";
 import { Modes } from "../../src/core/constants.ts";
 
-// Helper to check if the string returned is the correct bit length 
-// and correctly represents the number
-const testLength = 1; // We'll test with a length of 1
+/**
+ * Helper to generate expected binary string
+ */
 
-Deno.test("characterCount - versions 1 through 9 returns correct bit strings", () => {
-  for (let v = 1; v <= 9; v++) {
-    assertEquals(characterCount(v, Modes.Numeric, testLength), "0000000001");      // 10 bits
-    assertEquals(characterCount(v, Modes.Alphanumeric, testLength), "000000001");   // 9 bits
-    assertEquals(characterCount(v, Modes.Byte, testLength), "00000001");            // 8 bits
-    assertEquals(characterCount(v, Modes.Kanji, testLength), "00000001");           // 8 bits
+function expected(length: number, pad: number): string {
+  return length.toString(2).padStart(pad, "0");
+}
+
+Deno.test("characterCount - valid cases", () => {
+  const cases = [
+    // Versions 1–9
+    { version: 1,  mode: Modes.Numeric,      length: 5,  pad: 10 },
+    { version: 1,  mode: Modes.Alphanumeric, length: 5,  pad: 9  },
+    { version: 1,  mode: Modes.Byte,         length: 5,  pad: 8  },
+    { version: 1,  mode: Modes.Kanji,        length: 5,  pad: 8  },
+    { version: 9,  mode: Modes.Numeric,      length: 5,  pad: 10 },
+
+    // Versions 10–26
+    { version: 10, mode: Modes.Numeric,      length: 12, pad: 12 },
+    { version: 10, mode: Modes.Alphanumeric, length: 12, pad: 11 },
+    { version: 10, mode: Modes.Byte,         length: 12, pad: 16 },
+    { version: 10, mode: Modes.Kanji,        length: 12, pad: 10 },
+    { version: 26, mode: Modes.Numeric,      length: 12, pad: 12 },
+
+    // Versions 27–40
+    { version: 27, mode: Modes.Numeric,      length: 25, pad: 14 },
+    { version: 27, mode: Modes.Alphanumeric, length: 25, pad: 13 },
+    { version: 27, mode: Modes.Byte,         length: 25, pad: 16 },
+    { version: 27, mode: Modes.Kanji,        length: 25, pad: 12 },
+    { version: 40, mode: Modes.Numeric,      length: 25, pad: 14 },
+  ];
+
+  for (const { version, mode, length, pad } of cases) {
+    assertEquals(
+      characterCount(version, mode, length),
+      expected(length, pad)
+    );
   }
 });
 
-Deno.test("characterCount - versions 10 through 26 returns correct bit strings", () => {
-  for (let v = 10; v <= 26; v++) {
-    assertEquals(characterCount(v, Modes.Numeric, testLength), "000000000001");    // 12 bits
-    assertEquals(characterCount(v, Modes.Alphanumeric, testLength), "00000000001"); // 11 bits
-    assertEquals(characterCount(v, Modes.Byte, testLength), "0000000000000001");    // 16 bits
-    assertEquals(characterCount(v, Modes.Kanji, testLength), "0000000001");         // 10 bits
-  }
+Deno.test("characterCount - invalid versions", () => {
+  assertThrows(
+    () => characterCount(0, Modes.Numeric, 5),
+    Error,
+    "Invalid version number"
+  );
+
+  assertThrows(
+    () => characterCount(41, Modes.Numeric, 5),
+    Error,
+    "Invalid version number"
+  );
 });
 
-Deno.test("characterCount - versions 27 through 40 returns correct bit strings", () => {
-  for (let v = 27; v <= 40; v++) {
-    assertEquals(characterCount(v, Modes.Numeric, testLength), "00000000000001");   // 14 bits
-    assertEquals(characterCount(v, Modes.Alphanumeric, testLength), "0000000000001"); // 13 bits
-    assertEquals(characterCount(v, Modes.Byte, testLength), "0000000000000001");    // 16 bits
-    assertEquals(characterCount(v, Modes.Kanji, testLength), "000000000001");       // 12 bits
-  }
-});
