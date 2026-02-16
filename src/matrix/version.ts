@@ -6,7 +6,7 @@ import { Matrix } from "../types/matrix.ts";
  * computed using the generator polynomial 0x1f25 (degree 12).
  */
 
-function versions(version: number): number {
+export function versions(version: number): number {
     if (version < 7 || version > 40) throw new Error("version only valid for versions 7..40");
 
     const v = version << 12; // append 12 zero bits

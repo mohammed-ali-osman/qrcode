@@ -9,7 +9,7 @@ export function penalty(matrix: Matrix, size: number): number {
     )
 }
 
-function N1(matrix: Matrix, size: number): number {
+export function N1(matrix: Matrix, size: number): number {
     let score: number = 0;
 
     // consecutive colors
@@ -60,7 +60,7 @@ function N1(matrix: Matrix, size: number): number {
     return score;
 }
 
-function N2(matrix: Matrix, size: number): number {
+export function N2(matrix: Matrix, size: number): number {
     let score = 0;
 
     // 2x2 Block
@@ -78,7 +78,7 @@ function N2(matrix: Matrix, size: number): number {
     return score;
 }
 
-function N3(matrix: Matrix, size: number): number {
+export function N3(matrix: Matrix, size: number): number {
     let score = 0;
     const PATTERNS = [
         [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1],
@@ -130,7 +130,7 @@ function N3(matrix: Matrix, size: number): number {
     return score;
 }
 
-function N4(matrix: Matrix, size: number): number {
+export function N4(matrix: Matrix, size: number): number {
     let dark = 0;
     const total = size * size;
 

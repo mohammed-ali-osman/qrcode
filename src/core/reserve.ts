@@ -1,55 +1,52 @@
 import { ALIGNMENT_ANCHORS } from "./constants.ts";
 
 export function reserved(r: number, c: number, size: number): boolean {
+    let isReserved = false;
 
-    // 1. Finder Patterns (7x7) + Separators (1px white border)
-    // These take up an 8x8 area in the corners of the grid
-    if (r < 9 && c < 9) return true;            // Top-left
-    if (r < 9 && c >= size - 8) return true;    // Top-right
-    if (r >= size - 8 && c < 9) return true;    // Bottom-left
+    // finder
+    if (r < 9 && c < 9) isReserved = true;
+    if (r < 9 && c >= size - 8) isReserved = true;
+    if (r >= size - 8 && c < 9) isReserved = true;
 
-    // 2. Timing Patterns (The pink lines in your image)
-    // These run along the 6th row and 6th column
-    if (r === 6 || c === 6) return true;
+    // timing
+    if (r === 6 || c === 6) isReserved = true;
 
-    const version: number = (size - 17) / 4;
-    const centers = ALIGNMENT_ANCHORS[version]; // Assume this is available globally or passed in
-    if (centers && centers.length > 0) {
+    const version = (size - 17) / 4;
+    const centers = ALIGNMENT_ANCHORS[version];
+
+    if (centers?.length) {
         for (const rCenter of centers) {
             for (const cCenter of centers) {
-                // Check for finder overlaps like you do in your drawing function
-                if (rCenter < 10 && cCenter < 10 || rCenter < 10 && cCenter > size - 11 || rCenter > size - 11 && cCenter < 10) continue;
+                const overlapsFinder =
+                    (rCenter < 10 && cCenter < 10) ||
+                    (rCenter < 10 && cCenter > size - 11) ||
+                    (rCenter > size - 11 && cCenter < 10);
 
-                // If we are near a center point (within the 5x5 square boundaries)
-                if (Math.abs(r - rCenter) <= 2 && Math.abs(c - cCenter) <= 2) {
-                    return true; // This module is reserved
+                if (overlapsFinder) continue;
+
+                if (
+                    Math.abs(r - rCenter) <= 2 &&
+                    Math.abs(c - cCenter) <= 2
+                ) {
+                    isReserved = true;
                 }
             }
         }
     }
 
     // dark module
-    if (r === 4 * version + 9 && c === 8) return true;
+    if (r === 4 * version + 9 && c === 8) isReserved = true;
 
-    // information
-
-    // 1. Format info around top-left
-    if (r === 8 && c <= 8 && c !== 6) return true;
-    if (c === 8 && r <= 8 && r !== 6) return true;
-
-    // 2. Format info top-right (horizontal strip)
-    if (r === 8 && c >= size - 8) return true;
-
-    // 3. Format info bottom-left (vertical strip, FIXED)
-    if (c === 8 && r >= size - 8) return true;
+    // format info
+    if (r === 8 && c <= 8 && c !== 6) isReserved = true;
+    if (c === 8 && r <= 8 && r !== 6) isReserved = true;
+    if (r === 8 && c >= size - 8) isReserved = true;
+    if (c === 8 && r >= size - 8) isReserved = true;
 
     if (version >= 7) {
-        // bottom-left (6×3)
-        if (r >= size - 11 && r <= size - 9 && c <= 5) return true;
-
-        // top-right (3×6)
-        if (c >= size - 11 && c <= size - 9 && r <= 5) return true;
+        if (r >= size - 11 && r <= size - 9 && c <= 5) isReserved = true;
+        if (c >= size - 11 && c <= size - 9 && r <= 5) isReserved = true;
     }
 
-    return false;
+    return isReserved;
 }

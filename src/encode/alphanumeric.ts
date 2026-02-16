@@ -15,7 +15,7 @@ export function alpha(input: string): string[] {
         if (!(char in alphanumeric)) {
             throw new Error(`Invalid alphanumeric character: ${char}`);
         }
-        return alphanumeric[char]
+        return alphanumeric[char];
     });
 
     const groups: number[][] = [];
@@ -28,13 +28,10 @@ export function alpha(input: string): string[] {
         if (pairs.length === 2) {
             // 2-character pairs
             return (pairs[0] * 45 + pairs[1]).toString(2).padStart(11, '0');
-        } else if (pairs.length === 1) {
-            // 1-character pair
-            return pairs[0].toString(2).padStart(6, '0');
-        } else {
-            throw new Error("Empty pairs encountered");
         }
-    })
+        // 1-character pair
+        return pairs[0].toString(2).padStart(6, '0');
+    });
 
     return bits;
 }

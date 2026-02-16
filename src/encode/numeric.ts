@@ -4,7 +4,7 @@
 */
 export function numeric(input: string | number): string[] {
     if (typeof input === 'number' || /^[0-9]+$/.test(input)) {
-        const groups = input.toString().match(/\d{1,3}/g) || [];
+        const groups = input.toString().match(/\d{1,3}/g) as RegExpMatchArray;
 
         const bits = groups.map(group => {
             // Convert each group of digits to binary, ensuring correct paddings

@@ -1,5 +1,7 @@
-// @ts-ignore SVGElement data type
+import { Matrix } from "../types/matrix.ts";
+import { RenderOptions} from "../types/render.d.ts";
 
+// @ts-ignore SVGElement data type
 export function svg(matrix: Matrix, size: number, options?: RenderOptions): SVGElement {
 	const modules = matrix.length;
 	const margin = options?.margin ?? 4;
