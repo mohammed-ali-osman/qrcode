@@ -19,6 +19,10 @@ interface Options {
   render: RenderOptions;
 }
 
+/**
+ * This class represents a QR code generator. It takes an input string and optional configuration options to create a QR code matrix. The class includes methods to build the QR code by encoding the input data, applying error correction, and generating the final matrix. It also provides a render method to output the QR code in various formats such as SVG, canvas, PNG, or JPEG based on the specified rendering options.
+ */
+
 export class QRcode {
   input: string;
   mode: Modes;

@@ -27,12 +27,13 @@ export const toEcBits = (level: ErrorCorrectionLevel): ErrorCorrectionBits => {
     }
 };
 
+/**
+ * This function determines the optimal mask pattern for a given QR code matrix by applying each of the eight standard mask patterns and calculating the resulting penalty score for each. It iterates through each mask pattern, applies it to a clone of the original matrix, and uses the penalty function to evaluate the quality of the masked matrix. The mask pattern that yields the lowest penalty score is selected as the best choice for encoding the QR code, ensuring that the final code is as scannable and error-resistant as possible.
+ */
+
 export function mask(matrix: Matrix, size: number, ec: ErrorCorrectionLevel = "L"): number {
     let score = Infinity;
     let maskId = 0;
-
-    // Map string ErrorCorrectionLevel to format bits enum
-
 
     // Use entry index to track which mask (0-7) is being tested
     masks.forEach((maskFn, index) => {

@@ -1,6 +1,10 @@
 import { Codeword } from "./codeword.ts";
 import { Modes } from "./constants.ts";
 
+/** 
+This function constructs the bit stream for a QR code segment. It takes the mode, character count, data bits, and the number of codewords to determine how to format the bit stream correctly. The function ensures that the bit stream is properly terminated, padded to byte boundaries, and filled with pad bytes if necessary to reach the required length for the QR code version being generated.
+*/
+
 export function bitStream(mode: Modes, count: string, bits: string[], codeword: Codeword["codewords"]): string[] {
     const bytes: string[] = [];
     const PAD_BYTES = ['11101100', '00010001'];

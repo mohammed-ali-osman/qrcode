@@ -1,5 +1,9 @@
 import { ALIGNMENT_ANCHORS } from "./constants.ts";
 
+/**
+ * This function checks if a given module position (row and column) in the QR code is reserved for specific patterns or information. It considers the positions of finder patterns, timing patterns, alignment patterns, dark module, and format information areas based on the QR code version and size. The function returns true if the position is reserved for any of these elements, ensuring that data is not placed in these reserved areas during the encoding process.
+ */
+
 export function reserved(r: number, c: number, size: number): boolean {
     let isReserved = false;
 

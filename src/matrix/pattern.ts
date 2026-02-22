@@ -1,6 +1,9 @@
 import { Matrix } from "../types/matrix.ts";
-
 import { ALIGNMENT_ANCHORS } from "../core/constants.ts";
+
+/**
+ * This module implements the finder pattern on a given QR code matrix.
+ */
 
 export function finder(matrix: Matrix, size: number): void {
     const anchors: number[][] = [[0, 0], [0, size - 7], [size - 7, 0]];
@@ -23,6 +26,10 @@ export function finder(matrix: Matrix, size: number): void {
         }
     }
 }
+
+/**
+ * This function implements the separator pattern for QR codes.
+ */
 
 export function separator(matrix: Matrix, size: number) {
     const anchors: number[][] = [[0, 0], [0, size - 8], [size - 8, 0]];
@@ -61,6 +68,10 @@ export function separator(matrix: Matrix, size: number) {
     }
 }
 
+/**
+ * This function implements the timing pattern for QR code matrices.
+ */
+
 export function timing(matrix: Matrix, size: number) {
     const anchors: number[][] = [[6, 8], [8, 6]] // horizontal, vertical
 
@@ -88,6 +99,9 @@ export function timing(matrix: Matrix, size: number) {
     }
 }
 
+/**
+ * This function implements the alignment pattern for QR code matrices
+ */
 
 export function alignment(matrix: Matrix, size: number) {
     const version: number = (size - 17) / 4;
@@ -122,6 +136,10 @@ export function alignment(matrix: Matrix, size: number) {
     }
 
 }
+
+/**
+ * This function implements the dark module for QR code matrices.
+ */
 
 export function module(matrix: Matrix, size: number) {
     matrix[size - 8][8] = 1; // Same as (4 * version + 9) — dark module at (size-8,8)

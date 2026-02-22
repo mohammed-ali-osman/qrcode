@@ -6933,9 +6933,23 @@ const alpha: { [key: string]: number } = {
 */
 type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
 
+/**
+ * An array of error correction levels in order of increasing error correction capability.
+ */
+
 const quality: ErrorCorrectionLevel[] = ["H", "Q", "M", "L"];
 
+/**
+ * An array of the number of remainder bits for each QR code version.
+ * The index of the array corresponds to the QR code version (1-40).
+ * The value at each index represents the number of remainder bits for that version.
+ */
+
 const remainderBits: number[] = [0, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0]
+
+/**
+ * A mapping of QR code versions to their corresponding alignment pattern anchor positions.
+ */
 
 const ALIGNMENT_ANCHORS: { [version: number]: number[] } = {
     1: [],

@@ -1,6 +1,9 @@
 /**
  * This module encodes numeric input into binary strings.
  * It takes a string or number input, validates it, and returns an array of binary strings
+ * 
+ * @param input - The input string or number to encode.
+ * @returns An array of binary strings representing the encoded input.
 */
 export function numeric(input: string | number): string[] {
     if (typeof input === 'number' || /^[0-9]+$/.test(input)) {

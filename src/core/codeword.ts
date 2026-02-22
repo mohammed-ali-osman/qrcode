@@ -265,6 +265,14 @@ export interface Codeword {
   }[];
 }
 
+/**
+ * Get codeword information for a specific QR version and error correction level.
+ * @param version - QR code version (1-40)
+ * @param level - Error correction level (L, M, Q, H)
+ * @returns Codeword information including total codewords, error correction codewords, and group structure.
+ * @throws Error if the version or error correction level is invalid.
+ */
+
 export function codewords(version: number, level: ErrorCorrectionLevel): Codeword {
   if (!EC[version] || !EC[version][level]) {
     throw new Error(`Invalid version ${version} or error correction level ${level}`);

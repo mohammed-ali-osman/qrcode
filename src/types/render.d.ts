@@ -1,3 +1,8 @@
+
+/**
+ * This module defines the RenderOptions interface, which specifies the various options that can be used when rendering a QR code. The options include size, scale, margin, color settings for dark and light modules, output type (SVG, canvas, PNG, or JPEG), rounded corners, and logo settings such as source, width, excavation, shape, border radius, and background color. These options allow for customization of the QR code's appearance when generating it in different formats.
+ */
+
 export interface RenderOptions {
   size?: number;
   scale?: number;

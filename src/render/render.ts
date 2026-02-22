@@ -1,5 +1,9 @@
 import { Matrix } from "../types/matrix.ts";
-import { RenderOptions} from "../types/render.d.ts";
+import { RenderOptions } from "../types/render.d.ts";
+
+/**
+ * This function generates an svg element representing the QR code based on the provided matrix, size, and rendering options. It calculates the appropriate scale and margin to ensure the QR code fits within the specified size while maintaining its integrity. The function constructs the SVG structure using DOM APIs, creating a background rectangle and path elements for the dark modules of the QR code. If a logo is included in the options, it also handles the placement and optional excavation of modules under the logo area to maintain scannability. The resulting SVG element can be directly used in web applications or serialized for other uses.
+ */
 
 // @ts-ignore SVGElement data type
 export function svg(matrix: Matrix, size: number, options?: RenderOptions): SVGElement {
@@ -203,6 +207,10 @@ export function svg(matrix: Matrix, size: number, options?: RenderOptions): SVGE
 	return svgEl;
 }
 
+/**
+ * This function generates a PNG image of the QR code based on the provided matrix, size, and rendering options. It utilizes a canvas to draw the QR code, applying the specified colors and scaling according to the options. The function handles both Node.js and browser environments by checking for the presence of canvas APIs and returns the PNG data in the appropriate format (Buffer for Node.js and Data URL for browsers). If a supported canvas implementation is not found, it throws an error indicating that PNG generation is not possible.
+ */
+
 export function png(matrix: Matrix, size: number, options?: RenderOptions) {
 	const c = canvas(matrix, size, options);
 	// Node-canvas: has toBuffer, browser: has toDataURL
@@ -219,6 +227,10 @@ export function png(matrix: Matrix, size: number, options?: RenderOptions) {
 	throw new Error("Unable to produce PNG: no supported canvas implementation found.");
 }
 
+/**
+ * This function generates a JPEG image of the QR code based on the provided matrix, size, and rendering options. Similar to the PNG function, it uses a canvas to render the QR code and checks for the appropriate methods to output JPEG data depending on the environment (Node.js or browser). It returns the JPEG data as a Buffer in Node.js or as a Data URL in browsers. If no supported canvas implementation is found, it throws an error indicating that JPEG generation is not possible.
+ */
+
 export function jpg(matrix: Matrix, size: number, options?: RenderOptions) {
 	const c = canvas(matrix, size, options);
 	if (typeof c.toBuffer === "function") {
@@ -230,164 +242,168 @@ export function jpg(matrix: Matrix, size: number, options?: RenderOptions) {
 	throw new Error("Unable to produce JPG: no supported canvas implementation found.");
 }
 
+/**
+ * This function generates a canvas element with the QR code drawn on it based on the provided matrix, size, and rendering options. It calculates the appropriate scale and margin to ensure the QR code fits within the specified size while maintaining its integrity. The function handles both browser and Node.js environments by creating a canvas using the appropriate APIs. It fills the background, draws the dark modules, and optionally adds a logo with excavation if specified in the options. The resulting canvas element can be used directly in web applications or further processed for image generation.
+ */
+
 export function canvas(
-  matrix: Matrix,
-  size: number,
-  options: RenderOptions = {}
+	matrix: Matrix,
+	size: number,
+	options: RenderOptions = {}
 ) {
-  const modules = matrix.length;
-  const margin = options.margin ?? 4;
-  const total = modules + margin * 2;
+	const modules = matrix.length;
+	const margin = options.margin ?? 4;
+	const total = modules + margin * 2;
 
-  let scale =
-    options.scale ??
-    (options.size
-      ? Math.floor(options.size / total)
-      : Math.floor(size / total));
+	let scale =
+		options.scale ??
+		(options.size
+			? Math.floor(options.size / total)
+			: Math.floor(size / total));
 
-  if (scale < 1) scale = 1;
+	if (scale < 1) scale = 1;
 
-  const canvasSize = total * scale;
+	const canvasSize = total * scale;
 
-  const dark = options.color?.dark ?? "#000000";
-  const light = options.color?.light ?? "#FFFFFF";
+	const dark = options.color?.dark ?? "#000000";
+	const light = options.color?.light ?? "#FFFFFF";
 
-  const isBrowser =
-    typeof window !== "undefined" &&
-	// @ts-ignore document
-    typeof document !== "undefined";
+	const isBrowser =
+		typeof window !== "undefined" &&
+		// @ts-ignore document
+		typeof document !== "undefined";
 
-  let cvs;
+	let cvs;
 
-  if (isBrowser) {
-	// @ts-ignore document
-    cvs = document.createElement("canvas");
-  } else {
-    // Node environment
-    const { createCanvas } = require("canvas");
-    cvs = createCanvas(canvasSize, canvasSize);
-  }
+	if (isBrowser) {
+		// @ts-ignore document
+		cvs = document.createElement("canvas");
+	} else {
+		// Node environment
+		const { createCanvas } = require("canvas");
+		cvs = createCanvas(canvasSize, canvasSize);
+	}
 
-  cvs.width = canvasSize;
-  cvs.height = canvasSize;
+	cvs.width = canvasSize;
+	cvs.height = canvasSize;
 
-  const ctx = cvs.getContext("2d");
-  if (!ctx) throw new Error("Canvas 2D context not available");
+	const ctx = cvs.getContext("2d");
+	if (!ctx) throw new Error("Canvas 2D context not available");
 
-  // Background
-  ctx.fillStyle = light;
-  ctx.fillRect(0, 0, canvasSize, canvasSize);
+	// Background
+	ctx.fillStyle = light;
+	ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-  // Draw modules
-  ctx.fillStyle = dark;
-  for (let y = 0; y < modules; y++) {
-    for (let x = 0; x < modules; x++) {
-      if (matrix[y][x]) {
-        ctx.fillRect(
-          (x + margin) * scale,
-          (y + margin) * scale,
-          scale,
-          scale
-        );
-      }
-    }
-  }
+	// Draw modules
+	ctx.fillStyle = dark;
+	for (let y = 0; y < modules; y++) {
+		for (let x = 0; x < modules; x++) {
+			if (matrix[y][x]) {
+				ctx.fillRect(
+					(x + margin) * scale,
+					(y + margin) * scale,
+					scale,
+					scale
+				);
+			}
+		}
+	}
 
-  // Logo
-  const logo = options.logo;
-  if (logo) {
-    const lw = logo.width ?? 0.2;
-    const logoSizePx =
-      lw <= 1 ? Math.floor(lw * canvasSize) : Math.floor(lw);
+	// Logo
+	const logo = options.logo;
+	if (logo) {
+		const lw = logo.width ?? 0.2;
+		const logoSizePx =
+			lw <= 1 ? Math.floor(lw * canvasSize) : Math.floor(lw);
 
-    const lx = Math.floor((canvasSize - logoSizePx) / 2);
-    const ly = lx;
+		const lx = Math.floor((canvasSize - logoSizePx) / 2);
+		const ly = lx;
 
-    let img;
+		let img;
 
-    if (typeof logo.src === "string") {
-      if (isBrowser) {
-		// @ts-ignore image class
-        const tmp = new Image();
-        tmp.src = logo.src;
-        if (tmp.complete) img = tmp;
-      }
-    } else {
-      img = logo.src;
-    }
+		if (typeof logo.src === "string") {
+			if (isBrowser) {
+				// @ts-ignore image class
+				const tmp = new Image();
+				tmp.src = logo.src;
+				if (tmp.complete) img = tmp;
+			}
+		} else {
+			img = logo.src;
+		}
 
-    if (img) {
-      // Excavation
-      if (logo.excavate) {
-        ctx.save();
-        ctx.fillStyle = logo.background ?? light;
+		if (img) {
+			// Excavation
+			if (logo.excavate) {
+				ctx.save();
+				ctx.fillStyle = logo.background ?? light;
 
-        if (logo.shape === "circle") {
-          ctx.beginPath();
-          ctx.arc(
-            canvasSize / 2,
-            canvasSize / 2,
-            logoSizePx / 2,
-            0,
-            Math.PI * 2
-          );
-          ctx.fill();
-        } else if (logo.shape === "rounded") {
-          const r =
-            (typeof logo.borderRadius === "number"
-              ? logo.borderRadius
-              : Math.floor(logoSizePx * 0.15));
+				if (logo.shape === "circle") {
+					ctx.beginPath();
+					ctx.arc(
+						canvasSize / 2,
+						canvasSize / 2,
+						logoSizePx / 2,
+						0,
+						Math.PI * 2
+					);
+					ctx.fill();
+				} else if (logo.shape === "rounded") {
+					const r =
+						(typeof logo.borderRadius === "number"
+							? logo.borderRadius
+							: Math.floor(logoSizePx * 0.15));
 
-          ctx.beginPath();
-          ctx.moveTo(lx + r, ly);
-          ctx.arcTo(lx + logoSizePx, ly, lx + logoSizePx, ly + logoSizePx, r);
-          ctx.arcTo(lx + logoSizePx, ly + logoSizePx, lx, ly + logoSizePx, r);
-          ctx.arcTo(lx, ly + logoSizePx, lx, ly, r);
-          ctx.arcTo(lx, ly, lx + logoSizePx, ly, r);
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          ctx.fillRect(lx, ly, logoSizePx, logoSizePx);
-        }
+					ctx.beginPath();
+					ctx.moveTo(lx + r, ly);
+					ctx.arcTo(lx + logoSizePx, ly, lx + logoSizePx, ly + logoSizePx, r);
+					ctx.arcTo(lx + logoSizePx, ly + logoSizePx, lx, ly + logoSizePx, r);
+					ctx.arcTo(lx, ly + logoSizePx, lx, ly, r);
+					ctx.arcTo(lx, ly, lx + logoSizePx, ly, r);
+					ctx.closePath();
+					ctx.fill();
+				} else {
+					ctx.fillRect(lx, ly, logoSizePx, logoSizePx);
+				}
 
-        ctx.restore();
-      }
+				ctx.restore();
+			}
 
-      // Clipping
-      if (logo.shape === "circle" || logo.shape === "rounded") {
-        ctx.save();
-        ctx.beginPath();
+			// Clipping
+			if (logo.shape === "circle" || logo.shape === "rounded") {
+				ctx.save();
+				ctx.beginPath();
 
-        if (logo.shape === "circle") {
-          ctx.arc(
-            canvasSize / 2,
-            canvasSize / 2,
-            logoSizePx / 2,
-            0,
-            Math.PI * 2
-          );
-        } else {
-          const r =
-            (typeof logo.borderRadius === "number"
-              ? logo.borderRadius
-              : Math.floor(logoSizePx * 0.15));
+				if (logo.shape === "circle") {
+					ctx.arc(
+						canvasSize / 2,
+						canvasSize / 2,
+						logoSizePx / 2,
+						0,
+						Math.PI * 2
+					);
+				} else {
+					const r =
+						(typeof logo.borderRadius === "number"
+							? logo.borderRadius
+							: Math.floor(logoSizePx * 0.15));
 
-          ctx.moveTo(lx + r, ly);
-          ctx.arcTo(lx + logoSizePx, ly, lx + logoSizePx, ly + logoSizePx, r);
-          ctx.arcTo(lx + logoSizePx, ly + logoSizePx, lx, ly + logoSizePx, r);
-          ctx.arcTo(lx, ly + logoSizePx, lx, ly, r);
-          ctx.arcTo(lx, ly, lx + logoSizePx, ly, r);
-        }
+					ctx.moveTo(lx + r, ly);
+					ctx.arcTo(lx + logoSizePx, ly, lx + logoSizePx, ly + logoSizePx, r);
+					ctx.arcTo(lx + logoSizePx, ly + logoSizePx, lx, ly + logoSizePx, r);
+					ctx.arcTo(lx, ly + logoSizePx, lx, ly, r);
+					ctx.arcTo(lx, ly, lx + logoSizePx, ly, r);
+				}
 
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(img, lx, ly, logoSizePx, logoSizePx);
-        ctx.restore();
-      } else {
-        ctx.drawImage(img, lx, ly, logoSizePx, logoSizePx);
-      }
-    }
-  }
+				ctx.closePath();
+				ctx.clip();
+				ctx.drawImage(img, lx, ly, logoSizePx, logoSizePx);
+				ctx.restore();
+			} else {
+				ctx.drawImage(img, lx, ly, logoSizePx, logoSizePx);
+			}
+		}
+	}
 
-  return cvs;
+	return cvs;
 }

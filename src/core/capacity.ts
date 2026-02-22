@@ -258,6 +258,10 @@ export interface Capacity {
   readonly capacity: number
 }
 
+/**
+ * This function calculates the appropriate QR code version and error correction level based on the length of the input data, the encoding mode, and optionally specified version and error correction level. It checks the capacity table to ensure that the data can fit within the constraints of the chosen version and error correction level, throwing errors if the data is too long for the specified parameters or for any QR code version.
+ */
+
 export function capacity(length: number, mode: Modes, version?: number, ec?: ErrorCorrectionLevel): Capacity {
   if (length < 0) throw new RangeError("Length cannot be negative.");
 
