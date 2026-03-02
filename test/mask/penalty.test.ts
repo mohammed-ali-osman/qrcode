@@ -43,8 +43,8 @@ Deno.test("N3 detects horizontal finder-like pattern", () => {
   const size = 11;
   const matrix = Array.from({ length: size }, () => Array(size).fill(0));
 
-  // pattern: [0,0,0,0,1,0,1,1,1,0,1]
-  const pattern = [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1];
+  // pattern: [0,0,0,0,0,1,0,1,1,1,0,1]
+  const pattern = [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1];
   for (let i = 0; i < 11; i++) matrix[0][i] = pattern[i];
 
   assertEquals(N3(matrix, size), 40);
