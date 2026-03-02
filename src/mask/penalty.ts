@@ -27,7 +27,7 @@ export function N1(matrix: Matrix, size: number): number {
         let streak = 1;
 
         for (let c = 1; c < size; c++) {
-            if (matrix[r][c] === color) {
+            if (matrix[r][c] === color && matrix[r][c] != null) {
                 streak++;
             } else {
                 if (streak >= 5) {
@@ -48,7 +48,7 @@ export function N1(matrix: Matrix, size: number): number {
         let streak = 1;
 
         for (let r = 1; r < size; r++) {
-            if (matrix[r][c] === color) {
+            if (matrix[r][c] === color && matrix[r][c] != null) {
                 streak++;
             } else {
                 if (streak >= 5) {
@@ -97,8 +97,8 @@ export function N2(matrix: Matrix, size: number): number {
 export function N3(matrix: Matrix, size: number): number {
     let score = 0;
     const PATTERNS = [
-        [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1],
-        [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1],
+        [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
     ] as const;
 
     // Finder-like Patterns
