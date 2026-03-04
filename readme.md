@@ -9,14 +9,12 @@ QR code standards, advanced rendering, and flexible integration.
 ## Table of Contents
 
 - [Features](#features)
-- [Installation](#installation)
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
 - [Rendering Options](#rendering-options)
 - [Advanced Usage](#advanced-usage)
-- [Testing](#testing)
+- [Wiki](./../../wiki)
 - [License](#license)
-- [Contributing](#contributing)
 
 ---
 
@@ -30,18 +28,6 @@ QR code standards, advanced rendering, and flexible integration.
 - **Color Customization:** Module and background colors
 - **No Dependencies:** Pure TypeScript implementation
 - **Modular Design:** Use high-level or low-level APIs
-
----
-
-## Installation
-
-Install via npm:
-
-```bash
-npm install "@mohammedaliosman/qrcode"
-```
-
-Or download source files and transpile it and optional bundle it to use it.
 
 ---
 
@@ -164,16 +150,6 @@ logo: {
 - **Error Correction:** Fine-tune EC level for resilience
 - **Mask Selection:** Specify mask pattern for visual optimization
 - **Integration:** Embed QR output in web apps, Node.js, or export as image
-
----
-
-## Testing
-
-Run all tests:
-
-```bash
-npm test
-```
 
 ---
 
