@@ -25,6 +25,9 @@ enum Modes {
     // FNC1Second = 0b1001,
 }
 
+// type Primary = Exclude<Modes, Modes.ECI>;
+
+
 /**
  * A map of Unicode code points to Shift JIS byte values.
  * The keys are Unicode code points in hexadecimal format, and the values are corresponding Shift JIS byte values.
@@ -6934,6 +6937,17 @@ const alpha: { [key: string]: number } = {
 type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
 
 /**
+ * A range of error correction levels in .
+*/
+
+enum ErrorCorrectionBits {
+    L = 1, // 01 in binary
+    M = 0, // 00 in binary
+    Q = 3, // 11 in binary
+    H = 2  // 10 in binary
+}
+
+/**
  * An array of error correction levels in order of increasing error correction capability.
  */
 
@@ -6994,5 +7008,5 @@ const ALIGNMENT_ANCHORS: { [version: number]: number[] } = {
     40: [6, 30, 58, 86, 114, 142, 170]
 };
 
-export { Modes, range, alpha, quality, remainderBits, ALIGNMENT_ANCHORS };
+export { Modes, range, alpha, quality, remainderBits, ALIGNMENT_ANCHORS, ErrorCorrectionBits };
 export type { ErrorCorrectionLevel };

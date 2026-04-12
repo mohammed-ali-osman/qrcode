@@ -1,7 +1,5 @@
 import { assert, assertEquals } from "jsr:@std/assert@1.0.18";
-import { mask, masks, apply, toEcBits } from "../../src/mask/mask.ts";
-import { ErrorCorrectionBits } from "../../src/matrix/format.ts";
-import { ErrorCorrectionLevel } from "../../src/core/constants.ts";
+import { mask, masks, apply } from "../../src/mask/mask.ts";
 import { Matrix } from "../../src/types/matrix.ts";
 
 // import { masks, toEcBits, mask, apply } from "./mask.ts";
@@ -55,23 +53,6 @@ Deno.test("mask[7] complex rule", () => {
   assert(typeof result === "boolean");
 });
 
-
-// ─────────────────────────────────────────────
-// toEcBits tests
-// ─────────────────────────────────────────────
-
-Deno.test("toEcBits maps correctly", () => {
-  assertEquals(toEcBits("L"), ErrorCorrectionBits.L);
-  assertEquals(toEcBits("M"), ErrorCorrectionBits.M);
-  assertEquals(toEcBits("Q"), ErrorCorrectionBits.Q);
-  assertEquals(toEcBits("H"), ErrorCorrectionBits.H);
-});
-
-Deno.test("toEcBits defaults to L", () => {
-  assertEquals(toEcBits("invalid" as unknown as ErrorCorrectionLevel), ErrorCorrectionBits.L);
-});
-
-
 // ─────────────────────────────────────────────
 // apply() tests
 // ─────────────────────────────────────────────
@@ -114,7 +95,7 @@ Deno.test("mask returns a valid mask index 0-7", () => {
   const size = 21;
   const matrix = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) => ((r + c) % 2 ? 0 : 1)));
 
-  const result = mask(matrix, size, "L");
+  const result = mask(matrix, size);
 
   assert(result >= 0 && result <= 7);
 });

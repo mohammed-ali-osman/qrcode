@@ -37,7 +37,7 @@ Deno.test("characterCount - valid cases", () => {
 
   for (const { version, mode, length, pad } of cases) {
     assertEquals(
-      characterCount(version, mode, length),
+      characterCount(version, mode as Modes, length),
       expected(length, pad)
     );
   }

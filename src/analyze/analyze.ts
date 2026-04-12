@@ -1,4 +1,4 @@
-import { Modes } from '../core/constants.ts';
+import { Modes, range } from '../core/constants.ts';
 
 /**
  * This function analyzes the input data and returns an object containing the mode.
@@ -22,7 +22,7 @@ export function analyze(input: string | number): {
     } else if (/^[\u0020-\u007E\u00A0-\u00FF]+$/.test(input as string)) { // Control chars: \u0000–\u001F, \u007F, Printable ASCII: \u0020–\u007E, Extended Latin-1: \u00A0–\u00FF
         mode = Modes.Byte;
         length = (input as string).length;
-    } else if (/^[\u3040-\u30FF\u4E00-\u9FAF\u3400-\u4DBF]+$/.test(input as string)) {
+    } else if ((input as string).split('').every(char => char.codePointAt(0) as number in range)) {
 
         mode = Modes.Kanji;                 // This regex covers:
         length = (input as string).length;  // \u3040-\u309F: Hiragana

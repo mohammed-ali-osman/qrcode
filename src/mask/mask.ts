@@ -1,12 +1,10 @@
 import { reserved } from "../core/reserve.ts";
-import { format, apply as formatter, ErrorCorrectionBits } from "../matrix/format.ts";
 import { penalty } from "./penalty.ts";
 import { Matrix } from "../types/matrix.ts";
-import type { ErrorCorrectionLevel } from "../core/constants.ts";
 
-type Masks = (r: number, c: number) => boolean
+type Mask = (r: number, c: number) => boolean
 
-export const masks: Masks[] = [
+export const masks: Mask[] = [
     (r, c) => (r + c) % 2 === 0,
     (r, _c) => r % 2 === 0,
     (_r, c) => c % 3 === 0,
@@ -17,21 +15,11 @@ export const masks: Masks[] = [
     (r, c) => (((r + c) % 2) + ((r * c) % 3)) % 2 === 0
 ];
 
-export const toEcBits = (level: ErrorCorrectionLevel): ErrorCorrectionBits => {
-    switch (level) {
-        case "L": return ErrorCorrectionBits.L;
-        case "M": return ErrorCorrectionBits.M;
-        case "Q": return ErrorCorrectionBits.Q;
-        case "H": return ErrorCorrectionBits.H;
-        default: return ErrorCorrectionBits.L;
-    }
-};
-
 /**
  * This function determines the optimal mask pattern for a given QR code matrix by applying each of the eight standard mask patterns and calculating the resulting penalty score for each. It iterates through each mask pattern, applies it to a clone of the original matrix, and uses the penalty function to evaluate the quality of the masked matrix. The mask pattern that yields the lowest penalty score is selected as the best choice for encoding the QR code, ensuring that the final code is as scannable and error-resistant as possible.
  */
 
-export function mask(matrix: Matrix, size: number, ec: ErrorCorrectionLevel = "L"): number {
+export function mask(matrix: Matrix, size: number): number {
     let score = Infinity;
     let maskId = 0;
 
@@ -52,8 +40,6 @@ export function mask(matrix: Matrix, size: number, ec: ErrorCorrectionLevel = "L
             }
         }
 
-        formatter(clone, format(toEcBits(ec), index), size);
-
         const p = penalty(clone, size);
         if (p < score) {
             score = p;
@@ -64,7 +50,7 @@ export function mask(matrix: Matrix, size: number, ec: ErrorCorrectionLevel = "L
     return maskId;
 }
 
-export function apply(matrix: Matrix, mask: number, size: number) {
+export function apply(matrix: Matrix, maskId: number, size: number) {
 
     for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
@@ -72,7 +58,7 @@ export function apply(matrix: Matrix, mask: number, size: number) {
             if (reserved(r, c, size)) continue;
             if (matrix[r][c] == null) continue;
 
-            if (masks[mask](r, c)) {
+            if (masks[maskId](r, c)) {
                 (matrix[r][c] as number) ^= 1;
             }
         }

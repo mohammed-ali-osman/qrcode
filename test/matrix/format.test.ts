@@ -1,5 +1,6 @@
 import { assertEquals } from "jsr:@std/assert@1.0.18";
-import { format, apply as applyFormat, ErrorCorrectionBits } from "../../src/matrix/format.ts";
+import { ErrorCorrectionBits } from "../../src/core/constants.ts";
+import { format, apply as applyFormat } from "../../src/matrix/format.ts";
 
 Deno.test("format produces 15-bit sequence and apply maps bits to matrix positions", () => {
   const size = 21;

@@ -290,7 +290,7 @@ export function capacity(length: number, mode: Modes, version?: number, ec?: Err
   for (let v = 1; v <= 40; v++) {
     for (const ecLevel of quality) {
       const limit = capacities[v]?.[ecLevel]?.[mode];
-      
+
       if (limit !== undefined && limit >= length) {
         return { version: v, ec: ecLevel, mode, capacity: limit };
       }

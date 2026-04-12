@@ -1,11 +1,5 @@
 import { Matrix } from "../types/matrix.ts";
-
-export enum ErrorCorrectionBits {
-    L = 1, // 01 in binary
-    M = 0, // 00 in binary
-    Q = 3, // 11 in binary
-    H = 2  // 10 in binary
-}
+import { ErrorCorrectionBits } from "../core/constants.ts";
 
 /**
  * Generates the 15-bit format information sequence.
