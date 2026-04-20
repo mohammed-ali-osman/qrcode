@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "build": "deno bundle -o dist/index.js src/index.ts --minify"
+  },
+  
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1.0.18",
+    "@deno/dnt": "jsr:@deno/dnt@0.42.3"
+  }
+}

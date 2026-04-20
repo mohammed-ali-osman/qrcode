@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "@std/assert";
 import { kanji } from "../../src/encode/kanji.ts";
 
 Deno.test("kanji encodes characters in first range", () => {

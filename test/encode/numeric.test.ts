@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.18";
+import { assertEquals, assertThrows } from "@std/assert";
 import { numeric } from "../../src/encode/numeric.ts";
 
 Deno.test("test out range integers", () => {

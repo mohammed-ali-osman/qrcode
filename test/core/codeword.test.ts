@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.18";
+import { assertEquals, assertThrows } from "@std/assert";
 import { codewords } from "../../src/core/codeword.ts";
 import { ErrorCorrectionLevel } from "../../src/core/constants.ts";
 

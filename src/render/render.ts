@@ -280,8 +280,16 @@ export function canvas(
 		cvs = document.createElement("canvas");
 	} else {
 		// Node environment
-		const { createCanvas } = require("canvas");
-		cvs = createCanvas(canvasSize, canvasSize);
+		// Node environment
+		try {
+			const { createCanvas } = require("canvas");
+			cvs = createCanvas(canvasSize, canvasSize);
+		} catch (err) {
+			throw new Error(
+				"Canvas module is required in Node environment. Install it with `npm install canvas`.\n" +
+				"Original error: " + err
+			);
+		}
 	}
 
 	cvs.width = canvasSize;

@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "@std/assert";
 import { finder, separator, timing, alignment, module } from "../../src/matrix/pattern.ts";
 
 Deno.test("finder places 7x7 patterns in three corners", () => {

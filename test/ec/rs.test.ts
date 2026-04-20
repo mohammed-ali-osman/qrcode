@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "@std/assert";
 import { multiply, division, generator } from "../../src/ec/rs.ts";
 
 Deno.test("GF Multiply - edge cases and math", () => {

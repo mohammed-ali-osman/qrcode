@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "@std/assert";
 import { reserved } from "../../src/core/reserve.ts";
 
 Deno.test("Coverage: Dark Module (Line 32)", () => {

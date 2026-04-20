@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "@std/assert";
 import { penalty, N1, N2, N3, N4 } from "../../src/mask/penalty.ts";
 
 // N1: consecutive colors in rows and columns

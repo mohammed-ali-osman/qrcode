@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1.0.18";
+import { assert, assertEquals, assertThrows } from "@std/assert";
 import { capacity, capacities } from "../../src/core/capacity.ts";
 import { Modes, quality } from "../../src/core/constants.ts";
 

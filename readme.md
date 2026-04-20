@@ -4,8 +4,6 @@ A high-performance, fully customizable TypeScript library for generating QR
 codes. Designed for browser and Node.js environments, this library supports all
 QR code standards, advanced rendering, and flexible integration.
 
----
-
 ## Table of Contents
 
 - [Features](#features)
@@ -13,10 +11,9 @@ QR code standards, advanced rendering, and flexible integration.
 - [API Reference](#api-reference)
 - [Rendering Options](#rendering-options)
 - [Advanced Usage](#advanced-usage)
-- [Wiki](./../../wiki)
+- [Development](#development)
+- [Test](#test)
 - [License](#license)
-
----
 
 ## Features
 
@@ -28,8 +25,6 @@ QR code standards, advanced rendering, and flexible integration.
 - **Color Customization:** Module and background colors
 - **No Dependencies:** Pure TypeScript implementation
 - **Modular Design:** Use high-level or low-level APIs
-
----
 
 ## Quick Start
 
@@ -50,8 +45,6 @@ const qr = new QRcode("Hello, world!", {
 qr.build();
 const svgElement = qr.render();
 ```
-
----
 
 > [!NOTE]
 > You should build the **QR code** using **.build()** method then render it with
@@ -99,8 +92,6 @@ qr.build();
 const pngData = qr.render();
 ```
 
----
-
 ## Rendering Options
 
 See `src/types/render.d.ts` for full details. Key fields:
@@ -142,8 +133,6 @@ logo: {
 }
 ```
 
----
-
 ## Advanced Usage
 
 - **Custom Encoding:** Use lower-level modules for manual control
@@ -151,16 +140,36 @@ logo: {
 - **Mask Selection:** Specify mask pattern for visual optimization
 - **Integration:** Embed QR output in web apps, Node.js, or export as image
 
----
+## Development
+
+If you want to build the library from the source:
+
+1. Clone the repository
+
+```
+$ git clone https://github.com/mohammed-ali-osman/qrcode.git
+```
+
+or
+
+```
+$ git clone git@github.com:mohammed-ali-osman/qrcode.git
+```
+
+2. Build the project
+
+```
+$ deno task build
+```
+
+The compiled file will be generated in the `dist/` directory.
+
+## Test
+
+```
+$ deno test
+```
 
 ## License
 
-```txt
-Copyright 2026 Mohammed Ali Osman
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.

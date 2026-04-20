@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.18";
+import { assertEquals, assertThrows } from "@std/assert";
 import { versions, apply } from "../../src/matrix/version.ts";
 
 Deno.test("throws for versions < 7", () => {

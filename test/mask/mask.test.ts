@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "jsr:@std/assert@1.0.18";
+import { assert, assertEquals } from "@std/assert";
 import { mask, masks, apply } from "../../src/mask/mask.ts";
 import { Matrix } from "../../src/types/matrix.ts";
 

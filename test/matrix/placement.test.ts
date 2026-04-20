@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "@std/assert";
 import { placement, zigzag } from "../../src/matrix/placement.ts";
 import { reserved } from "../../src/core/reserve.ts";
 

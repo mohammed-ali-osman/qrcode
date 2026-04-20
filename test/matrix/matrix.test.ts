@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.18";
+import { assertEquals, assertThrows } from "@std/assert";
 import * as pattern from "../../src/matrix/pattern.ts";
 import { placement, zigzag } from "../../src/matrix/placement.ts";
 import { apply as applyVersion } from "../../src/matrix/version.ts";

@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "@std/assert";
 import { ErrorCorrectionBits } from "../../src/core/constants.ts";
 import { format, apply as applyFormat } from "../../src/matrix/format.ts";
 

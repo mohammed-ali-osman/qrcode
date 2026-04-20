@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.18";
+import { assertEquals, assertThrows } from "@std/assert";
 import { encode } from "../../src/encode/encode.ts";
 import { Modes } from "../../src/core/constants.ts";
 

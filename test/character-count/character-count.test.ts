@@ -1,5 +1,5 @@
 // character_count_bits.test.ts
-import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.13";
+import { assertEquals, assertThrows } from "@std/assert";
 import { characterCount } from "../../src/character-count/character-count.ts";
 import { Modes } from "../../src/core/constants.ts";
 
