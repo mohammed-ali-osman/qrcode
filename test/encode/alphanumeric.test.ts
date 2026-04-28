@@ -10,11 +10,11 @@ Deno.test("test out range characters", () => {
 
 Deno.test("test the 1 digits", () => {
   const data = "A";
-  assertEquals(alpha(data), ["001010"]);
+  assertEquals(alpha(data), [[10, 6]]);
 });
 
 Deno.test("test the 2 digits", () => {
   const data = "AB";
-  assertEquals(alpha(data), ["00111001101"]);
+  assertEquals(alpha(data), [[461, 11]]);
 });
 

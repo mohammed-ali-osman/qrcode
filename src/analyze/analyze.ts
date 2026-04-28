@@ -4,39 +4,31 @@ import { Modes, range } from '../core/constants.ts';
  * This function analyzes the input data and returns an object containing the mode.
  */
 
-export function analyze(input: string | number): {
-    mode: Modes,
-    length: number
-} {
-    let mode: Modes;
-    let length: number;
+function analyze(input: string | number): [Modes, number] {
+    input = input.toString();
+    const length: number = input.length;
 
-    //remind me later to change this to switch statement
-
+    // 1. Numeric check
     if (/^[0-9]+$/.test(input as string)) {
-        mode = Modes.Numeric;
-        length = input.toString().length;
-    } else if (/^[0-9A-Z\ \$\%\*\+\-\.\/\:]+$/.test(input as string)) {
-        mode = Modes.Alphanumeric;
-        length = (input as string).length;
-    } else if (/^[\u0020-\u007E\u00A0-\u00FF]+$/.test(input as string)) { // Control chars: \u0000–\u001F, \u007F, Printable ASCII: \u0020–\u007E, Extended Latin-1: \u00A0–\u00FF
-        mode = Modes.Byte;
-        length = (input as string).length;
-    } else if ((input as string).split('').every(char => char.codePointAt(0) as number in range)) {
+        return [Modes.Numeric, length];
+    }
 
-        mode = Modes.Kanji;                 // This regex covers:
-        length = (input as string).length;  // \u3040-\u309F: Hiragana
-                                            // \u30A0-\u30FF: Katakana
-                                            // \u4E00-\u9FAF & \u3400-\u4DBF: Common and Extension A Kanji
+    // 2. Alphanumeric check
+    if (/^[0-9A-Z $%*+\-./:]+$/.test(input)) {
+        return [Modes.Alphanumeric, length];
     }
-    /*
-     // comming soon
-     else if ([...input].some(char => char.charCodeAt(0) > 0xFF)) {
-        mode = Modes.ECI;
-        length = input.toString().length;
-    }*/
-    else {
-        throw new Error('Unsupported input format');
+
+    // 3. Byte check (Latin-1 / ISO-8859-1)
+    if (/^[\u0020-\u007E\u00A0-\u00FF]+$/.test(input)) {
+        return [Modes.Byte, length];
     }
-    return { mode, length };
+
+    // 4. Kanji check using the range registry
+    if (input.split('').every(char => char.codePointAt(0)! in range)) {
+        return [Modes.Kanji, length];
+    }
+
+    throw new Error('Unsupported input format');
 }
+
+export { analyze };

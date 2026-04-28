@@ -1,14 +1,16 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
-import { capacity, capacities } from "../../src/core/capacity.ts";
-import { Modes, quality } from "../../src/core/constants.ts";
+import { capacity } from "../../src/core/capacity.ts";
+import { capacities } from "../../src/core/constants.ts";
+import { Modes } from "../../src/core/constants.ts";
+import type { ErrorCorrectionLevel } from "../../src/types/core.ts";
 
 
-// 1️⃣ Negative length
+// Negative length
 Deno.test("capacity throws on negative length", () => {
   assertThrows(() => capacity(-1, Modes.Byte), RangeError);
 });
 
-// 2️⃣ Version + EC provided, valid
+// Version + EC provided, valid
 Deno.test("capacity returns correct version + ec when valid", () => {
   const result = capacity(10, Modes.Byte, 1, "L");
   assertEquals(result.version, 1);
@@ -17,30 +19,31 @@ Deno.test("capacity returns correct version + ec when valid", () => {
   assertEquals(result.capacity, capacities[1]["L"][Modes.Byte]);
 });
 
-// 3️⃣ Version + EC provided, too long
+// Version + EC provided, too long
 Deno.test("capacity throws if length exceeds version + EC", () => {
   const limit = capacities[1]["L"][Modes.Byte];
   assertThrows(() => capacity(limit + 1, Modes.Byte, 1, "L"), Error);
 });
 
-// 4️⃣ Version only, finds first EC that fits
+// Version only, finds first EC that fits
 Deno.test("capacity finds first valid EC for given version", () => {
   const length = 10;
   const result = capacity(length, Modes.Byte, 1);
   assertEquals(result.version, 1);
-  // ec should be first in quality list that fits
-  const ecIndex = quality.indexOf(result.ec);
-  const foundIndex = quality.findIndex(ec => capacities[1][ec][Modes.Byte] >= length);
+  // ec should be first in H, Q, M, L order that fits
+  const ecOrder = ["H", "Q", "M", "L"] as const;
+  const ecIndex = ecOrder.indexOf(result.ec);
+  const foundIndex = ecOrder.findIndex(ec => capacities[1][ec][Modes.Byte] >= length);
   assertEquals(ecIndex, foundIndex);
 });
 
-// 5️⃣ Version only, length too long for version
+// Version only, length too long for version
 Deno.test("capacity throws if version cannot fit length", () => {
   const maxV1 = Math.max(...Object.values(capacities[1]).flatMap(ec => Object.values(ec)));
   assertThrows(() => capacity(maxV1 + 1, Modes.Byte, 1), Error);
 });
 
-// 6️⃣ Auto version selection (smallest valid)
+// Auto version selection (smallest valid)
 Deno.test("capacity auto-selects smallest version that fits", () => {
   const length = 10;
   const result = capacity(length, Modes.Byte);
@@ -48,17 +51,18 @@ Deno.test("capacity auto-selects smallest version that fits", () => {
   assert(result.capacity >= length);
 });
 
-// 7️⃣ Too large for any version
+// Too large for any version
 Deno.test("capacity throws if length too large for all versions", () => {
   const maxGlobal = Math.max(
-    ...Object.values(capacities)
+    ...Object.values(capacities as Record<number, Record<ErrorCorrectionLevel, Record<Modes, number>>>)
       .flatMap(v => Object.values(v))
       .flatMap(ec => Object.values(ec))
   );
+
   assertThrows(() => capacity(maxGlobal + 1, Modes.Byte), Error);
 });
 
-// 8️⃣ Version provided but invalid (undefined limit)
+// Version provided but invalid (undefined limit)
 Deno.test("capacity throws if version is invalid", () => {
   assertThrows(() => capacity(10, Modes.Byte, 999, "L"), Error);
 });

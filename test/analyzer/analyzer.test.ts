@@ -7,7 +7,7 @@ Deno.test("analyze() detects numeric mode", () => {
   for (const input of inputs) {
     const result = analyze(input);
     assertEquals(
-      result.mode,
+      result[0],
       Modes.Numeric,
       `Failed on numeric input: ${input}`,
     );
@@ -19,7 +19,7 @@ Deno.test("analyze() detects alphanumeric mode", () => {
   for (const input of inputs) {
     const result = analyze(input);
     assertEquals(
-      result.mode,
+      result[0],
       Modes.Byte,
       `Failed on alphanumeric input: ${input}`,
     );
@@ -30,7 +30,7 @@ Deno.test("analyze() detects byte mode", () => {
   const inputs = ["ñ", "ö", "ü", "ß", "æ", "ø", "ÿ", "À", "Ç", "é", "è"]; // non-ASCII chars
   for (const input of inputs) {
     const result = analyze(input);
-    assertEquals(result.mode, Modes.Byte, `Failed on byte input: ${input}`);
+    assertEquals(result[0], Modes.Byte, `Failed on byte input: ${input}`);
   }
 });
 
@@ -40,7 +40,7 @@ Deno.test("analyze() detects kanji mode", () => {
   const inputs = ["茗", "漢", "字", "食", "電"];
   for (const input of inputs) {
     const result = analyze(input);
-    assertEquals(result.mode, Modes.Kanji, `Failed on kanji input: ${input}`);
+    assertEquals(result[0], Modes.Kanji, `Failed on kanji input: ${input}`);
   }
 });
 
@@ -50,7 +50,7 @@ Deno.test("analyze() detects kanji mode", () => {
 
 Deno.test("analyze() detects alphanumeric mode for uppercase input", () => {
   const res = analyze("HELLO123");
-  assertEquals(res.mode, Modes.Alphanumeric);
+  assertEquals(res[0], Modes.Alphanumeric);
 });
 
 Deno.test("analyze() throws on unsupported characters (emoji)", () => {

@@ -22,7 +22,7 @@ const log: Uint8Array = new Uint8Array([0, 0, 1, 25, 2, 50, 26, 198, 3, 223, 51,
  * This function performs multiplication in the Galois Field GF(256) used for Reed-Solomon error correction in QR codes. It takes two elements (a and b) as input and returns their product. The function uses logarithm and exponentiation tables to efficiently compute the product, which is essential for generating error correction codewords and performing polynomial division during the encoding process. If either input is zero, the result is immediately zero, as per the properties of multiplication in a finite field.
  */
 
-export function multiply(a: number, b: number): number {
+function multiply(a: number, b: number): number {
     if (a === 0 || b === 0) return 0;
 
     // log(a · b) = log(a) + log(b)
@@ -35,7 +35,7 @@ export function multiply(a: number, b: number): number {
  * This function generates the generator polynomial for Reed-Solomon error correction based on the specified degree (input). The generator polynomial is constructed by multiplying factors of the form (x - a^i) for i from 0 to input-1, where a is a primitive element of the Galois Field GF(256). The resulting polynomial is returned as a Uint8Array, which can be used in the encoding process to create error correction codewords. The generator polynomial is crucial for ensuring that the QR code can recover from errors and maintain data integrity even when parts of the code are damaged or obscured.
  */
 
-export function generator(input: number): Uint8Array {
+function generator(input: number): Uint8Array {
     let poly = new Uint8Array([1]);
 
     for (let i = 0; i < input; i++) {
@@ -57,7 +57,7 @@ export function generator(input: number): Uint8Array {
  * This function performs polynomial division of the message by the generator polynomial to calculate the error correction codewords for Reed-Solomon error correction in QR codes. It takes the message (data bytes) and the generator polynomial as input and returns the remainder of the division, which represents the error correction codewords. The function uses bitwise XOR operations to perform the division, which is a common method for polynomial division in finite fields. The resulting error correction codewords can be appended to the data bytes to create a complete codeword sequence for encoding into the QR code, allowing for error detection and correction during scanning.
  */
 
-export function division(message: Uint8Array, generator: Uint8Array): Uint8Array {
+function division(message: Uint8Array, generator: Uint8Array): Uint8Array {
 
     const buffer = new Uint8Array(message.length + generator.length - 1);
     buffer.set(message);
@@ -73,3 +73,5 @@ export function division(message: Uint8Array, generator: Uint8Array): Uint8Array
 
     return buffer.slice(buffer.length - generator.length + 1);
 }
+
+export { multiply, generator, division };

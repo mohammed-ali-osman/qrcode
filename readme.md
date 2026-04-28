@@ -1,4 +1,4 @@
-# QR code TypeScript Library
+# Peno
 
 A high-performance, fully customizable TypeScript library for generating QR
 codes. Designed for browser and Node.js environments, this library supports all
@@ -80,21 +80,44 @@ interface Options {
 
 #### Methods
 
-- `build()`: Generates the QR code matrix
-- `render()`: Renders the QR code as SVG/Canvas/PNG/JPG (Return element if it's
-  svg/canvas else png/jpg returns Base64)
+- `build()`: Generates the QR code matrix.
+- `render()`: Renders the QR code as Svg/Canvas/PNG/JPG based on options.
+
+> [!NOTE]
+> Recommendation: Use SVG for Web The svg renderer is the flagship choice for
+> web applications. It provides the highest score and ensures a sharp, scalable
+> image. It is also the only engine that natively supports auto-generated titles
+> for screen readers.
+
+> [!CAUTION]
+> When using canvas() or image-based outputs (PNG/JPG) with a logo, ensure the
+> logo is pre-loaded or provided as a Data URI, as these methods do not support
+> asynchronous loading during the render cycle.
 
 #### Example
 
 ```typescript
-const qr = new QRcode("Data", { render: { type: "png" } });
+// For image-based outputs (PNG/JPG)
+const qr = new QRcode("https://example.com", {
+  render: { type: "png", size: 512 },
+});
+
 qr.build();
+
+// Returns a Base64 Data URI string in the browser
+// or a Buffer in Node.js
 const pngData = qr.render();
 ```
 
 ## Rendering Options
 
-See `src/types/render.d.ts` for full details. Key fields:
+| Format  | Return type         | Status |
+| ------- | ------------------- | ------ |
+| SVG     | `SVGElement`        | Stable |
+| Canvas  | `HTMLCanvasElement` | _Beta_ |
+| PNG/JPG | `string` / `Buffer` | _Beta_ |
+
+See `src/types/render.ts` for full details. Key fields:
 
 ```ts
 interface RenderOptions {
@@ -109,14 +132,14 @@ interface RenderOptions {
 
   type?: "svg" | "canvas" | "png" | "jpg";
 
-  rounded?: boolean;
+  content?: string;
 
   logo?: {
     src: string;
     width?: number; // ratio (<=1) or pixels (>1). default 0.2 (20%)
     excavate?: boolean; // clear modules underneath the logo area
     shape?: "square" | "rounded" | "circle";
-    borderRadius?: boolean;
+    borderRadius?: string;
     background?: string; // background color behind logo; undefined = transparent
   };
 }
@@ -129,7 +152,8 @@ logo: {
   src: 'logo.png',
   width: 0.2, // 20% of QR size
   shape: 'circle',
-  excavate: true
+  excavate: true,
+  background: "#ffffff" // Ensure the logo is visibile
 }
 ```
 
@@ -138,7 +162,7 @@ logo: {
 - **Custom Encoding:** Use lower-level modules for manual control
 - **Error Correction:** Fine-tune EC level for resilience
 - **Mask Selection:** Specify mask pattern for visual optimization
-- **Integration:** Embed QR output in web apps, Node.js, or export as image
+- **Integration:** Embed QR output in web apps
 
 ## Development
 
@@ -172,4 +196,5 @@ $ deno test
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE)
+file for details.

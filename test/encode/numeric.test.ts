@@ -10,17 +10,17 @@ Deno.test("test out range integers", () => {
 });
 
 Deno.test("test 1 digit integers", () => {
-  assertEquals(numeric(1), ["0001"]);
+  assertEquals(numeric(1), [[1, 4]]);
 });
 
 Deno.test("test 2 digit integers", () => {
-  assertEquals(numeric("12"), ["0001100"]);
+  assertEquals(numeric("12"), [[12, 7]]);
 });
 
 Deno.test("test 3 digit integers", () => {
-  assertEquals(numeric(123), ["0001111011"]);
+  assertEquals(numeric(123), [[123, 10]]);
 });
 
 Deno.test("test 4 digit integers", () => {
-  assertEquals(numeric(1234), ["0001111011", "0100"]);
+  assertEquals(numeric(1234), [[123, 10], [4, 4]]);
 });

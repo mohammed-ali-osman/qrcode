@@ -1,12 +1,11 @@
-import { Matrix } from "../types/matrix.ts";
 import { ErrorCorrectionBits } from "../core/constants.ts";
+import type { Matrix } from "../types/matrix.ts";
 
 /**
  * Generates the 15-bit format information sequence.
- * @param ec The error correction level from your enum.
- * @param maskId The winning mask ID (0-7) from your mask function.
  */
-export function format(ec: ErrorCorrectionBits, maskId: number): number {
+
+function format(ec: ErrorCorrectionBits, maskId: number): number {
     // 1. Combine EC bits (2 bits) and Mask ID (3 bits) into a 5-bit data string
     const data = (ec << 3) | maskId;
 
@@ -22,7 +21,7 @@ export function format(ec: ErrorCorrectionBits, maskId: number): number {
 }
 
 
-export function apply(matrix: Matrix, formatBits: number, size: number) {
+function apply(matrix: Matrix, formatBits: number, size: number) {
     // 1. Top-Left Strip
     // Bits 0-5: (8, 0-5) | Bit 6: (8, 7) | Bit 7: (8, 8) | Bit 8: (7, 8) | Bits 9-14: (0-5, 8)
     const topLeftCoords = [
@@ -38,19 +37,21 @@ export function apply(matrix: Matrix, formatBits: number, size: number) {
 
         // Place in Top-Left region
         const [r1, c1] = topLeftCoords[i];
-        matrix[r1][c1] = bit;
+        matrix[r1 * size + c1] = bit;
 
         // Place in Split region
         if (i < 8) {
             // Horizontal Top-Right
-            matrix[8][size - 1 - i] = bit;
+            matrix[8 * size + size - 1 - i] = bit;
         } else {
             // Vertical Bottom-Left
-            matrix[size - 15 + i][8] = bit;
+            matrix[(size - 15 + i) * size + 8] = bit;
         }
     }
 
     // 3. Always-Black "Dark Module"
     // Located at (size-8, 8)
-    matrix[size - 8][8] = 1;
+    matrix[size - 8 * size + 8] = 1;
 }
+
+export { format, apply };

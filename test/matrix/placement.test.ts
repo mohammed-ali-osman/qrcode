@@ -20,19 +20,19 @@ Deno.test("zigzag yields expected first and last coordinates for size=6", () => 
 
 Deno.test("placement fills non-reserved null modules in zigzag order", () => {
 	const size = 12;
-	const matrix = Array.from({ length: size }, () => Array(size).fill(null as number | null));
+	const matrix = new Uint8Array(size * size).fill(255);
 
 	// mark reserved modules with 0 so placement won't overwrite them
 	for (let r = 0; r < size; r++) {
 		for (let c = 0; c < size; c++) {
-			if (reserved(r, c, size)) matrix[r][c] = 0;
+			if (reserved(r, c, size)) matrix[r * size + c] = 0;
 		}
 	}
 
 	// Count data modules (null & not reserved)
 	const coords: [number, number][] = [];
 	for (const [r, c] of zigzag(size)) {
-		if (matrix[r][c] === null) coords.push([r, c]);
+		if (matrix[r * size + c] === 255) coords.push([r, c]);
 	}
 
 	const bits = coords.map((_, i) => (i % 2)); // 0/1 alternating
@@ -42,7 +42,7 @@ Deno.test("placement fills non-reserved null modules in zigzag order", () => {
 	// Verify bits were placed in the order of coords
 	for (let i = 0; i < coords.length; i++) {
 		const [r, c] = coords[i];
-		assertEquals(matrix[r][c], bits[i]);
+		assertEquals(matrix[r * size + c], bits[i]);
 	}
 });
 

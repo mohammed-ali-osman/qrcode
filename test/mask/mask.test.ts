@@ -1,9 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
 import { mask, masks, apply } from "../../src/mask/mask.ts";
-import { Matrix } from "../../src/types/matrix.ts";
-
-// import { masks, toEcBits, mask, apply } from "./mask.ts";
-// import { ErrorCorrectionBits } from "../matrix/format.ts";
 
 // ─────────────────────────────────────────────
 // masks[] tests
@@ -60,29 +56,29 @@ Deno.test("mask[7] complex rule", () => {
 Deno.test("apply flips bits when mask condition is true", () => {
   // Use a larger matrix so reserved() does not mark our test cells
   const size = 12;
-  const matrix = Array.from({ length: size }, () => Array(size).fill(1));
+  const matrix = new Uint8Array(size * size).fill(1)
 
   // Use mask 0: (r + c) % 2 === 0
   // Choose non-reserved coordinates in the bottom-right quadrant
-  matrix[11][11] = 1; // 11+11 = 22 even -> should flip
-  matrix[10][10] = 1; // 10+10 = 20 even -> should flip
+  matrix[11 * size + 11] = 1; // 11+11 = 22 even -> should flip
+  matrix[10 * size + 10] = 1; // 10+10 = 20 even -> should flip
 
   apply(matrix, 0, size);
 
-  assertEquals(matrix[11][11], 0);
-  assertEquals(matrix[10][10], 0);
+  assertEquals(matrix[11 * size + 11], 0);
+  assertEquals(matrix[10 * size + 10], 0);
 });
 
 Deno.test("apply skips null cells", () => {
   const size = 12;
-  const matrix = Array.from({ length: size }, () => Array(size).fill(1 as number | null));
+  const matrix = new Uint8Array(size * size).fill(1);
 
   // place a null in a non-reserved cell
-  matrix[11][10] = null;
+  matrix[11 * size + 10] = 255;
 
   apply(matrix, 0, size);
 
-  assertEquals(matrix[11][10], null);
+  assertEquals(matrix[11 * size + 10], 255);
 });
 
 
@@ -93,7 +89,14 @@ Deno.test("apply skips null cells", () => {
 Deno.test("mask returns a valid mask index 0-7", () => {
   // Use a realistic QR size (version 1 -> 21x21) so format bits can be written
   const size = 21;
-  const matrix = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) => ((r + c) % 2 ? 0 : 1)));
+
+  const matrix = new Uint8Array(size * size);
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      matrix[r * size + c] = (r + c) % 2 ? 0 : 1;
+    }
+  }
 
   const result = mask(matrix, size);
 
@@ -102,10 +105,16 @@ Deno.test("mask returns a valid mask index 0-7", () => {
 
 Deno.test("mask skips null cells during evaluation and uses default ec", () => {
   const size = 21;
-  const matrix = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) => ((r + c) % 2 ? 0 : 1)));
+  const matrix = new Uint8Array(size * size);
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      matrix[r * size + c] = (r + c) % 2 ? 0 : 1;
+    }
+  }
 
   // Place a null in a non-reserved cell to trigger the internal null-skip branch
-  (matrix as Matrix)[11][11] = null;
+  matrix[11 * size + 11] = 255;
 
   const result = mask(matrix, size); // omit ec to exercise default
   assert(result >= 0 && result <= 7);

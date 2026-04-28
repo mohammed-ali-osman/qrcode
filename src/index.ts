@@ -1,78 +1,69 @@
 import { analyze } from "./analyze/analyze.ts";
-import { Capacity, capacity } from "./core/capacity.ts";
-import { encode } from "./encode/encode.ts";
-import { division, generator } from "./ec/rs.ts";
-import { ErrorCorrectionLevel, Modes } from "./core/constants.ts";
 import { characterCount } from "./character-count/character-count.ts";
-import { codewords } from "./core/codeword.ts";
 import { bitStream } from "./core/bitStream.ts";
+import { capacity } from "./core/capacity.ts";
+import { encode } from "./encode/encode.ts";
+import { codeword } from "./core/codeword.ts";
+import { Modes } from "./core/constants.ts";
+import { division, generator } from "./ec/rs.ts";
 import { block, interleave } from "./core/interleave.ts";
 import { matrix } from "./matrix/matrix.ts";
-import { canvas, jpg, png, svg } from "./render/render.ts";
-import { Matrix } from "./types/matrix.ts";
-import { RenderOptions } from "./types/render.d.ts";
-
-interface Options {
-  version?: number;
-  ec?: ErrorCorrectionLevel;
-  mask?: number;
-  render: RenderOptions;
-}
+import * as Render from "./render/render.ts";
+import type { Options } from "./types/core.ts";
+import type { Capacity, ErrorCorrectionLevel } from "./types/core.ts";
+import type { Matrix } from "./types/matrix.ts";
 
 /**
  * This class represents a QR code generator. It takes an input string and optional configuration options to create a QR code matrix. The class includes methods to build the QR code by encoding the input data, applying error correction, and generating the final matrix. It also provides a render method to output the QR code in various formats such as SVG, canvas, PNG, or JPEG based on the specified rendering options.
  */
 
-export class QRcode {
-  input: string;
+class QRcode {
+  input: string | number;
   mode: Modes;
   version: number;
   ec: ErrorCorrectionLevel;
   modules: number;
+  length: number;
   options: Options | undefined;
   matrix: Matrix;
 
-  constructor(input: string, options?: Options) {
+  constructor(input: string | number, options?: Options) {
     this.input = input;
-    this.mode = analyze(input).mode;
+    const [mode, length] = analyze(input);
+    this.mode = mode;
+    this.length = length;
 
-    const cap: Capacity = capacity(
-      input.length,
-      this.mode,
-      options?.version,
-      options?.ec,
-    );
+    const cap: Capacity = capacity(length, this.mode, options?.version, options?.ec);
+
     this.version = options?.version ?? cap.version;
     this.ec = options?.ec ?? cap.ec;
     this.modules = this.version * 4 + 17;
 
     this.options = options;
-    this.matrix = [];
+    this.matrix = new Uint8Array(this.modules * this.modules);
   }
 
   public build() {
-    const count = characterCount(this.version, this.mode, this.input.length);
+    const count = characterCount(this.version, this.mode, this.length);
     const data = encode(this.input, this.mode);
 
-    const cw = codewords(this.version, this.ec);
+    const cw = codeword(this.version, this.ec);
     const bytes = bitStream(this.mode, count, data, cw.codewords);
 
-    const dataBlocks = block(
-      new Uint8Array(bytes.map((b) => parseInt(b, 2))),
-      cw.groups,
-    );
+    const dataBlocks = block(bytes, cw.groups);
+
     const ecBlocks = dataBlocks.map((b) =>
       division(b, generator(cw.ecCodewords))
     );
 
-    const interleavedData = interleave(dataBlocks, cw.codewords);
-    const interleavedEC = interleave(ecBlocks, cw.ecCodewords);
+    const interleaved = {
+      data: interleave(dataBlocks, cw.codewords),
+      ec: interleave(ecBlocks, cw.ecCodewords)
+    }
 
-    const message = new Uint8Array([...interleavedData, ...interleavedEC]);
+    const message = new Uint8Array([...interleaved.data, ...interleaved.ec]);
 
-    this.matrix.push(
-      ...matrix(message, this.ec, this.modules, this.options?.mask),
-    );
+    this.matrix.set(matrix(message, this.ec, this.modules, this.options?.mask));
 
     return this;
   }
@@ -80,25 +71,25 @@ export class QRcode {
   public render() {
     let element;
 
-    switch (this.options?.render.type) {
+    switch (this.options?.render?.type) {
       case "svg":
-        element = svg(this.matrix, this.modules, this.options.render);
+        element = Render.svg(this.matrix, this.modules, { ...this.options.render, content: this.options.render.content || this.input as string });
         break;
       case "canvas":
-        element = canvas(this.matrix, this.modules, this.options.render);
+        element = Render.canvas(this.matrix, this.modules, this.options.render);
         break;
       case "png":
-        element = png(this.matrix, this.modules, this.options.render);
+        element = Render.png(this.matrix, this.modules, this.options.render);
         break;
       case "jpg":
-        element = jpg(this.matrix, this.modules, this.options.render);
+        element = Render.jpg(this.matrix, this.modules, this.options.render);
         break;
       default:
-        throw new Error(
-          "Please choose an output format type by passing options.",
-        );
+        throw new Error("Please choose an output format type by passing options.");
     }
 
     return element;
   }
 }
+
+export { QRcode };

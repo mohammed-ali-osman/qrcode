@@ -1,27 +1,24 @@
+import type { Pack } from "../types/core.ts"
+
 /**
  * This module encodes numeric input into binary strings.
  * It takes a string or number input, validates it, and returns an array of binary strings
- * 
- * @param input - The input string or number to encode.
- * @returns An array of binary strings representing the encoded input.
 */
-export function numeric(input: string | number): string[] {
-    if (typeof input === 'number' || /^[0-9]+$/.test(input)) {
-        const groups = input.toString().match(/\d{1,3}/g) as RegExpMatchArray;
 
-        const bits = groups.map(group => {
-            // Convert each group of digits to binary, ensuring correct paddings
-            if (group.length === 3) {
-                return parseInt(group, 10).toString(2).padStart(10, '0');
-            } else if (group.length === 2) {
-                return parseInt(group, 10).toString(2).padStart(7, '0');
-            } else {
-                return parseInt(group, 10).toString(2).padStart(4, '0');
-            }
-        });
-        
-        return bits;
-    } else {
+function numeric(input: string | number): Pack[] {
+
+    if (!/^[0-9]+$/.test(`${input}`)) {
         throw new Error('Input must be a number or numeric string');
     }
+
+    const groups = input.toString().match(/\d{1,3}/g) as RegExpMatchArray;
+
+    return groups.map(group => {
+        const value = parseInt(group, 10);
+        const size = group.length === 3 ? 10 : group.length === 2 ? 7 : 4;
+
+        return [value, size];
+    });
 }
+
+export { numeric };

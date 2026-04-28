@@ -1,44 +1,34 @@
 import { Modes } from "../core/constants.ts";
+import type { Pack } from "../types/core.ts";
 
 /**
  * This function calculates the character count for a given version and mode.
 */
 
-export function characterCount(version: number, mode: Modes, length: number): string {
-    if (version >= 1 && version <= 9) {
-        switch (mode) {
-            case Modes.Numeric:
-                return (length).toString(2).padStart(10, '0');
-            case Modes.Alphanumeric:
-                return (length).toString(2).padStart(9, '0');
-            case Modes.Byte:
-                return (length).toString(2).padStart(8, '0');
-            case Modes.Kanji:
-                return (length).toString(2).padStart(8, '0');
-        }
-    } else if (version >= 10 && version <= 26) {
-        switch (mode) {
-            case Modes.Numeric:
-                return (length).toString(2).padStart(12, '0');
-            case Modes.Alphanumeric:
-                return (length).toString(2).padStart(11, '0');
-            case Modes.Byte:
-                return (length).toString(2).padStart(16, '0');
-            case Modes.Kanji:
-                return (length).toString(2).padStart(10, '0');
-        }
-    } else if (version >= 27 && version <= 40) {
-        switch (mode) {
-            case Modes.Numeric:
-                return (length).toString(2).padStart(14, '0');
-            case Modes.Alphanumeric:
-                return (length).toString(2).padStart(13, '0');
-            case Modes.Byte:
-                return (length).toString(2).padStart(16, '0');
-            case Modes.Kanji:
-                return (length).toString(2).padStart(12, '0');
-        }
-    } else {
+function characterCount(version: number, mode: Modes, length: number): Pack {
+    // A static map for O(1) size lookups
+    // Structure: [Numeric, Alphanumeric, Byte, Kanji]
+    const SIZES: number[][] = [
+        [10, 9, 8, 8],  // Versions 1-9
+        [12, 11, 16, 10], // Versions 10-26
+        [14, 13, 16, 12]  // Versions 27-40
+    ];
+
+    // Determine the version range index
+    const range = version > 0 ? version < 10 ? 0 : version < 27 ? 1 : version < 41 ? 2 : undefined : undefined;
+    const m = mode == 1 ? 0 : mode == 2 ? 1 : mode == 4 ? 2 : mode == 8 ? 3 : undefined;
+
+    if (range == undefined) {
         throw new Error("Invalid version number. Version must be between 1 and 40.");
     }
+
+    if (m == undefined) {
+        throw new Error("Unsupported mode");
+    }
+
+    const size = SIZES[range][m];
+
+    return [length, size];
 }
+
+export { characterCount };

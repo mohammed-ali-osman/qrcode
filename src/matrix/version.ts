@@ -1,4 +1,4 @@
-import { Matrix } from "../types/matrix.ts";
+import type { Matrix } from "../types/matrix.ts";
 
 /**
  * Compute the 18-bit version information value for versions >= 7.
@@ -6,7 +6,7 @@ import { Matrix } from "../types/matrix.ts";
  * computed using the generator polynomial 0x1f25 (degree 12).
  */
 
-export function versions(version: number): number {
+function versions(version: number): number {
     if (version < 7 || version > 40) throw new Error("version only valid for versions 7..40");
 
     const v = version << 12; // append 12 zero bits
@@ -30,16 +30,24 @@ export function versions(version: number): number {
  * Bits are placed in two 3x6 areas: adjacent to the top-right and bottom-left
  * finder patterns as specified by the QR Code standard.
  */
-export function apply(matrix: Matrix, size: number, version: number) {
-    const vBits = versions(version);
 
-    // Place into top-right (rows 0..5, cols size-11..size-9)
+function apply(matrix: Matrix, size: number, version: number) {
+    const vBits = versions(version);
+    const idx = (r: number, c: number) => r * size + c;
+
+    // Only applies for version >= 7 (you should guard this externally or here)
     for (let i = 0; i < 6; i++) {
         for (let j = 0; j < 3; j++) {
-            const bitIndex = i * 3 + j; // 0..17
+            const bitIndex = 17 - (i * 3 + j); // MSB first
             const bit = (vBits >> bitIndex) & 1;
-            matrix[i][size - 11 + j] = bit;
-            matrix[size - 11 + j][i] = bit; // bottom-left symmetric placement
+
+            // Top-right block
+            matrix[idx(i, size - 11 + j)] = bit;
+
+            // Bottom-left block (mirrored)
+            matrix[idx(size - 11 + j, i)] = bit;
         }
     }
 }
+
+export { versions, apply };

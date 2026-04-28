@@ -1,37 +1,40 @@
 import { alpha as alphanumeric } from "../core/constants.ts";
+import type { Pack } from "../types/core.ts";
 
 /**
  * Encodes a string in alphanumeric mode for QR codes.
  * The alphanumeric encoding uses a specific mapping of characters to values.
  * Each pair of characters is encoded into an 11-bit binary string.
- *
- * @param input - The input string to encode.
- * @returns An array of binary strings representing the encoded input.
- * @throws Error if an invalid character is encountered.
  */
 
-export function alpha(input: string): string[] {
+function alpha(input: string | number): Pack[] {
+    input = input.toString();
+
+    // 1. Convert characters to their QR table values
     const corresponding: number[] = input.split("").map((char) => {
-        if (!(char in alphanumeric)) {
+        const val = alphanumeric[char];
+        if (val === undefined) {
             throw new Error(`Invalid alphanumeric character: ${char}`);
         }
-        return alphanumeric[char];
+        return val;
     });
 
-    const groups: number[][] = [];
+    const packs: Pack[] = [];
+
+    // 2. Process in pairs
     for (let i = 0; i < corresponding.length; i += 2) {
-        const group = corresponding.slice(i, i + 2);
-        groups.push(group);
+        if (i + 1 < corresponding.length) {
+            // 2-character pair: (V1 * 45) + V2
+            const value = corresponding[i] * 45 + corresponding[i + 1];
+            packs.push([value, 11]);
+        } else {
+            // 1-character remaining: just the value
+            const value = corresponding[i];
+            packs.push([value, 6]);
+        }
     }
 
-    const bits: string[] = groups.map((pairs) => {
-        if (pairs.length === 2) {
-            // 2-character pairs
-            return (pairs[0] * 45 + pairs[1]).toString(2).padStart(11, '0');
-        }
-        // 1-character pair
-        return pairs[0].toString(2).padStart(6, '0');
-    });
-
-    return bits;
+    return packs;
 }
+
+export { alpha };

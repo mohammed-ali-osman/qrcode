@@ -35,17 +35,17 @@ Deno.test("result is always 18 bits", () => {
 
 Deno.test("version.apply throws for versions outside 7..40", () => {
   const size = 21;
-  const m = Array.from({ length: size }, () => Array(size).fill(null));
+  const m = new Uint8Array(size * size).fill(255);
   // below range
   assertThrows(() => apply(m, size, 6));
   // above range
-  const m2 = Array.from({ length: 100 }, () => Array(100).fill(null));
+  const m2 = new Uint8Array(100).fill(255);
   assertThrows(() => apply(m2, 100, 41));
 });
 
 Deno.test("applying for 7..40", () => {
   const size = 45;
-  const m = Array.from({ length: size }, () => Array(size).fill(null));
+  const m = new Uint8Array(size * size).fill(255);
 
   assertEquals(apply(m, size, 7), undefined);
 });

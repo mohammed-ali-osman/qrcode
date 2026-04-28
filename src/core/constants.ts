@@ -1,31 +1,531 @@
+import type { CapacityTable, ErrorCorrectionTable } from "../types/core.ts";
 
 /**
-* Constants for QR Code modes.
-* These modes define how data is encoded in a QR Code.
-* @readonly
-* @enum {number} Modes
-* @property {number} **`Numeric`** - Numeric mode (0-9).
-* @property {number} **`Alphanumeric`** - Alphanumeric mode (0-9, A-Z, space, $, %, *, +, -, ., /, :).
-* @property {number} **`Byte`** - Byte mode (8-bit bytes).
-* @property {number} **`Kanji`** - Kanji mode (Shift JIS encoding).
-* @property {number} **`ECI`** - Extended Channel Interpretation (for character sets).
-* @property {number} **`SAM`** - Structured Append Mode (for combining multiple QR Codes).
-* @property {number} **`FNC1First`** - FNC1 in first position (for GS1 applications).
-* @property {number} **`FNC1Second`** - FNC1 in second position (for GS1 applications).
-*/
+ * QR Code encoding modes.
+ * Each mode defines how input data is encoded in the QR Code.
+ */
 
 enum Modes {
+    /** Numeric mode (digits 0–9). */
     Numeric = 0b0001,
+    /** Alphanumeric mode (0–9, A–Z, space, $, %, *, +, -, ., /, :). */
     Alphanumeric = 0b0010,
+    /** Byte mode (8-bit binary data). */
     Byte = 0b0100,
+    /** Kanji mode (Shift JIS encoding). */
     Kanji = 0b1000,
+    /** Extended Channel Interpretation (character set switching). */
     // ECI = 0b0111,
+    /** Structured Append Mode (link multiple QR codes). */
     // SAM = 0b0011,
+    /** FNC1 in first position (GS1 applications). */
     // FNC1First = 0b0101,
+    /** FNC1 in second position (GS1 applications). */
     // FNC1Second = 0b1001,
 }
 
 // type Primary = Exclude<Modes, Modes.ECI>;
+
+/**
+ * QR Code capacity table for different versions and error correction levels.
+ * This table defines the maximum number of characters that can be encoded
+ * in a QR Code of a specific version and error correction level.
+ */
+
+const capacities: CapacityTable = {
+    1: {
+        L: { [Modes.Numeric]: 41, [Modes.Alphanumeric]: 25, [Modes.Byte]: 17, [Modes.Kanji]: 10 },
+        M: { [Modes.Numeric]: 34, [Modes.Alphanumeric]: 20, [Modes.Byte]: 14, [Modes.Kanji]: 8 },
+        Q: { [Modes.Numeric]: 27, [Modes.Alphanumeric]: 16, [Modes.Byte]: 11, [Modes.Kanji]: 7 },
+        H: { [Modes.Numeric]: 17, [Modes.Alphanumeric]: 10, [Modes.Byte]: 7, [Modes.Kanji]: 4 },
+    },
+    2: {
+        L: { [Modes.Numeric]: 77, [Modes.Alphanumeric]: 47, [Modes.Byte]: 32, [Modes.Kanji]: 20 },
+        M: { [Modes.Numeric]: 63, [Modes.Alphanumeric]: 38, [Modes.Byte]: 26, [Modes.Kanji]: 16 },
+        Q: { [Modes.Numeric]: 48, [Modes.Alphanumeric]: 29, [Modes.Byte]: 20, [Modes.Kanji]: 12 },
+        H: { [Modes.Numeric]: 34, [Modes.Alphanumeric]: 20, [Modes.Byte]: 14, [Modes.Kanji]: 8 },
+    },
+    3: {
+        L: { [Modes.Numeric]: 127, [Modes.Alphanumeric]: 77, [Modes.Byte]: 53, [Modes.Kanji]: 32 },
+        M: { [Modes.Numeric]: 101, [Modes.Alphanumeric]: 61, [Modes.Byte]: 42, [Modes.Kanji]: 26 },
+        Q: { [Modes.Numeric]: 77, [Modes.Alphanumeric]: 47, [Modes.Byte]: 32, [Modes.Kanji]: 20 },
+        H: { [Modes.Numeric]: 58, [Modes.Alphanumeric]: 35, [Modes.Byte]: 24, [Modes.Kanji]: 15 },
+    },
+    4: {
+        L: { [Modes.Numeric]: 187, [Modes.Alphanumeric]: 114, [Modes.Byte]: 78, [Modes.Kanji]: 48 },
+        M: { [Modes.Numeric]: 149, [Modes.Alphanumeric]: 90, [Modes.Byte]: 62, [Modes.Kanji]: 38 },
+        Q: { [Modes.Numeric]: 111, [Modes.Alphanumeric]: 67, [Modes.Byte]: 46, [Modes.Kanji]: 28 },
+        H: { [Modes.Numeric]: 82, [Modes.Alphanumeric]: 50, [Modes.Byte]: 34, [Modes.Kanji]: 21 },
+    },
+    5: {
+        L: { [Modes.Numeric]: 255, [Modes.Alphanumeric]: 154, [Modes.Byte]: 106, [Modes.Kanji]: 65 },
+        M: { [Modes.Numeric]: 202, [Modes.Alphanumeric]: 122, [Modes.Byte]: 84, [Modes.Kanji]: 52 },
+        Q: { [Modes.Numeric]: 144, [Modes.Alphanumeric]: 87, [Modes.Byte]: 60, [Modes.Kanji]: 37 },
+        H: { [Modes.Numeric]: 106, [Modes.Alphanumeric]: 64, [Modes.Byte]: 44, [Modes.Kanji]: 27 },
+    },
+    6: {
+        L: { [Modes.Numeric]: 322, [Modes.Alphanumeric]: 195, [Modes.Byte]: 134, [Modes.Kanji]: 82 },
+        M: { [Modes.Numeric]: 255, [Modes.Alphanumeric]: 154, [Modes.Byte]: 106, [Modes.Kanji]: 65 },
+        Q: { [Modes.Numeric]: 178, [Modes.Alphanumeric]: 108, [Modes.Byte]: 74, [Modes.Kanji]: 45 },
+        H: { [Modes.Numeric]: 139, [Modes.Alphanumeric]: 84, [Modes.Byte]: 58, [Modes.Kanji]: 36 },
+    },
+    7: {
+        L: { [Modes.Numeric]: 370, [Modes.Alphanumeric]: 224, [Modes.Byte]: 154, [Modes.Kanji]: 95 },
+        M: { [Modes.Numeric]: 293, [Modes.Alphanumeric]: 178, [Modes.Byte]: 122, [Modes.Kanji]: 75 },
+        Q: { [Modes.Numeric]: 207, [Modes.Alphanumeric]: 125, [Modes.Byte]: 86, [Modes.Kanji]: 53 },
+        H: { [Modes.Numeric]: 154, [Modes.Alphanumeric]: 93, [Modes.Byte]: 64, [Modes.Kanji]: 39 },
+    },
+    8: {
+        L: { [Modes.Numeric]: 461, [Modes.Alphanumeric]: 279, [Modes.Byte]: 192, [Modes.Kanji]: 118 },
+        M: { [Modes.Numeric]: 365, [Modes.Alphanumeric]: 221, [Modes.Byte]: 152, [Modes.Kanji]: 93 },
+        Q: { [Modes.Numeric]: 259, [Modes.Alphanumeric]: 157, [Modes.Byte]: 108, [Modes.Kanji]: 66 },
+        H: { [Modes.Numeric]: 202, [Modes.Alphanumeric]: 122, [Modes.Byte]: 84, [Modes.Kanji]: 52 },
+    },
+    9: {
+        L: { [Modes.Numeric]: 552, [Modes.Alphanumeric]: 335, [Modes.Byte]: 230, [Modes.Kanji]: 141 },
+        M: { [Modes.Numeric]: 432, [Modes.Alphanumeric]: 262, [Modes.Byte]: 180, [Modes.Kanji]: 111 },
+        Q: { [Modes.Numeric]: 312, [Modes.Alphanumeric]: 189, [Modes.Byte]: 130, [Modes.Kanji]: 80 },
+        H: { [Modes.Numeric]: 235, [Modes.Alphanumeric]: 143, [Modes.Byte]: 98, [Modes.Kanji]: 60 },
+    },
+    10: {
+        L: { [Modes.Numeric]: 652, [Modes.Alphanumeric]: 395, [Modes.Byte]: 271, [Modes.Kanji]: 167 },
+        M: { [Modes.Numeric]: 513, [Modes.Alphanumeric]: 311, [Modes.Byte]: 213, [Modes.Kanji]: 131 },
+        Q: { [Modes.Numeric]: 364, [Modes.Alphanumeric]: 221, [Modes.Byte]: 151, [Modes.Kanji]: 93 },
+        H: { [Modes.Numeric]: 288, [Modes.Alphanumeric]: 174, [Modes.Byte]: 119, [Modes.Kanji]: 74 },
+    },
+    11: {
+        L: { [Modes.Numeric]: 772, [Modes.Alphanumeric]: 468, [Modes.Byte]: 321, [Modes.Kanji]: 198 },
+        M: { [Modes.Numeric]: 604, [Modes.Alphanumeric]: 366, [Modes.Byte]: 251, [Modes.Kanji]: 155 },
+        Q: { [Modes.Numeric]: 427, [Modes.Alphanumeric]: 259, [Modes.Byte]: 177, [Modes.Kanji]: 109 },
+        H: { [Modes.Numeric]: 331, [Modes.Alphanumeric]: 200, [Modes.Byte]: 137, [Modes.Kanji]: 85 },
+    },
+    12: {
+        L: { [Modes.Numeric]: 883, [Modes.Alphanumeric]: 535, [Modes.Byte]: 367, [Modes.Kanji]: 226 },
+        M: { [Modes.Numeric]: 691, [Modes.Alphanumeric]: 419, [Modes.Byte]: 287, [Modes.Kanji]: 177 },
+        Q: { [Modes.Numeric]: 489, [Modes.Alphanumeric]: 296, [Modes.Byte]: 203, [Modes.Kanji]: 125 },
+        H: { [Modes.Numeric]: 374, [Modes.Alphanumeric]: 227, [Modes.Byte]: 155, [Modes.Kanji]: 96 },
+    },
+    13: {
+        L: { [Modes.Numeric]: 1022, [Modes.Alphanumeric]: 619, [Modes.Byte]: 425, [Modes.Kanji]: 262 },
+        M: { [Modes.Numeric]: 796, [Modes.Alphanumeric]: 483, [Modes.Byte]: 331, [Modes.Kanji]: 204 },
+        Q: { [Modes.Numeric]: 580, [Modes.Alphanumeric]: 352, [Modes.Byte]: 241, [Modes.Kanji]: 149 },
+        H: { [Modes.Numeric]: 427, [Modes.Alphanumeric]: 259, [Modes.Byte]: 177, [Modes.Kanji]: 109 },
+    },
+    14: {
+        L: { [Modes.Numeric]: 1101, [Modes.Alphanumeric]: 667, [Modes.Byte]: 458, [Modes.Kanji]: 282 },
+        M: { [Modes.Numeric]: 871, [Modes.Alphanumeric]: 528, [Modes.Byte]: 362, [Modes.Kanji]: 223 },
+        Q: { [Modes.Numeric]: 621, [Modes.Alphanumeric]: 376, [Modes.Byte]: 258, [Modes.Kanji]: 159 },
+        H: { [Modes.Numeric]: 468, [Modes.Alphanumeric]: 283, [Modes.Byte]: 194, [Modes.Kanji]: 120 },
+    },
+    15: {
+        L: { [Modes.Numeric]: 1250, [Modes.Alphanumeric]: 758, [Modes.Byte]: 520, [Modes.Kanji]: 320 },
+        M: { [Modes.Numeric]: 991, [Modes.Alphanumeric]: 600, [Modes.Byte]: 412, [Modes.Kanji]: 254 },
+        Q: { [Modes.Numeric]: 703, [Modes.Alphanumeric]: 426, [Modes.Byte]: 292, [Modes.Kanji]: 180 },
+        H: { [Modes.Numeric]: 530, [Modes.Alphanumeric]: 321, [Modes.Byte]: 220, [Modes.Kanji]: 136 },
+    },
+    16: {
+        L: { [Modes.Numeric]: 1408, [Modes.Alphanumeric]: 854, [Modes.Byte]: 586, [Modes.Kanji]: 361 },
+        M: { [Modes.Numeric]: 1082, [Modes.Alphanumeric]: 656, [Modes.Byte]: 450, [Modes.Kanji]: 277 },
+        Q: { [Modes.Numeric]: 775, [Modes.Alphanumeric]: 470, [Modes.Byte]: 322, [Modes.Kanji]: 198 },
+        H: { [Modes.Numeric]: 602, [Modes.Alphanumeric]: 365, [Modes.Byte]: 250, [Modes.Kanji]: 154 },
+    },
+    17: {
+        L: { [Modes.Numeric]: 1548, [Modes.Alphanumeric]: 938, [Modes.Byte]: 644, [Modes.Kanji]: 397 },
+        M: { [Modes.Numeric]: 1212, [Modes.Alphanumeric]: 734, [Modes.Byte]: 504, [Modes.Kanji]: 310 },
+        Q: { [Modes.Numeric]: 876, [Modes.Alphanumeric]: 531, [Modes.Byte]: 364, [Modes.Kanji]: 224 },
+        H: { [Modes.Numeric]: 674, [Modes.Alphanumeric]: 408, [Modes.Byte]: 280, [Modes.Kanji]: 173 },
+    },
+    18: {
+        L: { [Modes.Numeric]: 1725, [Modes.Alphanumeric]: 1046, [Modes.Byte]: 718, [Modes.Kanji]: 442 },
+        M: { [Modes.Numeric]: 1346, [Modes.Alphanumeric]: 816, [Modes.Byte]: 560, [Modes.Kanji]: 345 },
+        Q: { [Modes.Numeric]: 948, [Modes.Alphanumeric]: 574, [Modes.Byte]: 394, [Modes.Kanji]: 243 },
+        H: { [Modes.Numeric]: 746, [Modes.Alphanumeric]: 452, [Modes.Byte]: 310, [Modes.Kanji]: 191 },
+    },
+    19: {
+        L: { [Modes.Numeric]: 1903, [Modes.Alphanumeric]: 1153, [Modes.Byte]: 792, [Modes.Kanji]: 488 },
+        M: { [Modes.Numeric]: 1500, [Modes.Alphanumeric]: 909, [Modes.Byte]: 624, [Modes.Kanji]: 384 },
+        Q: { [Modes.Numeric]: 1063, [Modes.Alphanumeric]: 644, [Modes.Byte]: 442, [Modes.Kanji]: 272 },
+        H: { [Modes.Numeric]: 813, [Modes.Alphanumeric]: 493, [Modes.Byte]: 338, [Modes.Kanji]: 208 },
+    },
+    20: {
+        L: { [Modes.Numeric]: 2061, [Modes.Alphanumeric]: 1249, [Modes.Byte]: 858, [Modes.Kanji]: 528 },
+        M: { [Modes.Numeric]: 1600, [Modes.Alphanumeric]: 970, [Modes.Byte]: 666, [Modes.Kanji]: 410 },
+        Q: { [Modes.Numeric]: 1159, [Modes.Alphanumeric]: 702, [Modes.Byte]: 482, [Modes.Kanji]: 297 },
+        H: { [Modes.Numeric]: 919, [Modes.Alphanumeric]: 557, [Modes.Byte]: 382, [Modes.Kanji]: 235 },
+    },
+    21: {
+        L: { [Modes.Numeric]: 2232, [Modes.Alphanumeric]: 1352, [Modes.Byte]: 929, [Modes.Kanji]: 572 },
+        M: { [Modes.Numeric]: 1708, [Modes.Alphanumeric]: 1035, [Modes.Byte]: 711, [Modes.Kanji]: 438 },
+        Q: { [Modes.Numeric]: 1224, [Modes.Alphanumeric]: 742, [Modes.Byte]: 509, [Modes.Kanji]: 314 },
+        H: { [Modes.Numeric]: 969, [Modes.Alphanumeric]: 587, [Modes.Byte]: 403, [Modes.Kanji]: 248 },
+    },
+    22: {
+        L: { [Modes.Numeric]: 2409, [Modes.Alphanumeric]: 1460, [Modes.Byte]: 1003, [Modes.Kanji]: 618 },
+        M: { [Modes.Numeric]: 1872, [Modes.Alphanumeric]: 1134, [Modes.Byte]: 779, [Modes.Kanji]: 480 },
+        Q: { [Modes.Numeric]: 1358, [Modes.Alphanumeric]: 823, [Modes.Byte]: 565, [Modes.Kanji]: 348 },
+        H: { [Modes.Numeric]: 1056, [Modes.Alphanumeric]: 640, [Modes.Byte]: 439, [Modes.Kanji]: 270 },
+    },
+    23: {
+        L: { [Modes.Numeric]: 2620, [Modes.Alphanumeric]: 1588, [Modes.Byte]: 1091, [Modes.Kanji]: 672 },
+        M: { [Modes.Numeric]: 2059, [Modes.Alphanumeric]: 1248, [Modes.Byte]: 857, [Modes.Kanji]: 528 },
+        Q: { [Modes.Numeric]: 1468, [Modes.Alphanumeric]: 890, [Modes.Byte]: 611, [Modes.Kanji]: 376 },
+        H: { [Modes.Numeric]: 1108, [Modes.Alphanumeric]: 672, [Modes.Byte]: 461, [Modes.Kanji]: 284 },
+    },
+    24: {
+        L: { [Modes.Numeric]: 2812, [Modes.Alphanumeric]: 1704, [Modes.Byte]: 1171, [Modes.Kanji]: 721 },
+        M: { [Modes.Numeric]: 2188, [Modes.Alphanumeric]: 1326, [Modes.Byte]: 911, [Modes.Kanji]: 561 },
+        Q: { [Modes.Numeric]: 1588, [Modes.Alphanumeric]: 963, [Modes.Byte]: 661, [Modes.Kanji]: 407 },
+        H: { [Modes.Numeric]: 1228, [Modes.Alphanumeric]: 744, [Modes.Byte]: 511, [Modes.Kanji]: 315 },
+    },
+    25: {
+        L: { [Modes.Numeric]: 3057, [Modes.Alphanumeric]: 1853, [Modes.Byte]: 1273, [Modes.Kanji]: 784 },
+        M: { [Modes.Numeric]: 2395, [Modes.Alphanumeric]: 1451, [Modes.Byte]: 997, [Modes.Kanji]: 614 },
+        Q: { [Modes.Numeric]: 1718, [Modes.Alphanumeric]: 1041, [Modes.Byte]: 715, [Modes.Kanji]: 440 },
+        H: { [Modes.Numeric]: 1286, [Modes.Alphanumeric]: 779, [Modes.Byte]: 535, [Modes.Kanji]: 330 },
+    },
+    26: {
+        L: { [Modes.Numeric]: 3283, [Modes.Alphanumeric]: 1990, [Modes.Byte]: 1367, [Modes.Kanji]: 842 },
+        M: { [Modes.Numeric]: 2544, [Modes.Alphanumeric]: 1542, [Modes.Byte]: 1059, [Modes.Kanji]: 652 },
+        Q: { [Modes.Numeric]: 1804, [Modes.Alphanumeric]: 1094, [Modes.Byte]: 751, [Modes.Kanji]: 462 },
+        H: { [Modes.Numeric]: 1425, [Modes.Alphanumeric]: 864, [Modes.Byte]: 593, [Modes.Kanji]: 365 },
+    },
+    27: {
+        L: { [Modes.Numeric]: 3517, [Modes.Alphanumeric]: 2132, [Modes.Byte]: 1465, [Modes.Kanji]: 902 },
+        M: { [Modes.Numeric]: 2701, [Modes.Alphanumeric]: 1637, [Modes.Byte]: 1125, [Modes.Kanji]: 692 },
+        Q: { [Modes.Numeric]: 1933, [Modes.Alphanumeric]: 1172, [Modes.Byte]: 805, [Modes.Kanji]: 496 },
+        H: { [Modes.Numeric]: 1501, [Modes.Alphanumeric]: 910, [Modes.Byte]: 625, [Modes.Kanji]: 385 },
+    },
+    28: {
+        L: { [Modes.Numeric]: 3669, [Modes.Alphanumeric]: 2223, [Modes.Byte]: 1528, [Modes.Kanji]: 940 },
+        M: { [Modes.Numeric]: 2857, [Modes.Alphanumeric]: 1732, [Modes.Byte]: 1190, [Modes.Kanji]: 732 },
+        Q: { [Modes.Numeric]: 2085, [Modes.Alphanumeric]: 1263, [Modes.Byte]: 868, [Modes.Kanji]: 534 },
+        H: { [Modes.Numeric]: 1581, [Modes.Alphanumeric]: 958, [Modes.Byte]: 658, [Modes.Kanji]: 405 },
+    },
+    29: {
+        L: { [Modes.Numeric]: 3909, [Modes.Alphanumeric]: 2369, [Modes.Byte]: 1628, [Modes.Kanji]: 1002 },
+        M: { [Modes.Numeric]: 3035, [Modes.Alphanumeric]: 1839, [Modes.Byte]: 1264, [Modes.Kanji]: 778 },
+        Q: { [Modes.Numeric]: 2181, [Modes.Alphanumeric]: 1322, [Modes.Byte]: 908, [Modes.Kanji]: 559 },
+        H: { [Modes.Numeric]: 1677, [Modes.Alphanumeric]: 1016, [Modes.Byte]: 698, [Modes.Kanji]: 430 },
+    },
+    30: {
+        L: { [Modes.Numeric]: 4158, [Modes.Alphanumeric]: 2520, [Modes.Byte]: 1732, [Modes.Kanji]: 1066 },
+        M: { [Modes.Numeric]: 3289, [Modes.Alphanumeric]: 1994, [Modes.Byte]: 1370, [Modes.Kanji]: 843 },
+        Q: { [Modes.Numeric]: 2358, [Modes.Alphanumeric]: 1429, [Modes.Byte]: 982, [Modes.Kanji]: 604 },
+        H: { [Modes.Numeric]: 1782, [Modes.Alphanumeric]: 1080, [Modes.Byte]: 742, [Modes.Kanji]: 457 },
+    },
+    31: {
+        L: { [Modes.Numeric]: 4417, [Modes.Alphanumeric]: 2677, [Modes.Byte]: 1840, [Modes.Kanji]: 1132 },
+        M: { [Modes.Numeric]: 3486, [Modes.Alphanumeric]: 2113, [Modes.Byte]: 1452, [Modes.Kanji]: 894 },
+        Q: { [Modes.Numeric]: 2473, [Modes.Alphanumeric]: 1499, [Modes.Byte]: 1030, [Modes.Kanji]: 634 },
+        H: { [Modes.Numeric]: 1897, [Modes.Alphanumeric]: 1150, [Modes.Byte]: 790, [Modes.Kanji]: 486 },
+    },
+    32: {
+        L: { [Modes.Numeric]: 4686, [Modes.Alphanumeric]: 2840, [Modes.Byte]: 1952, [Modes.Kanji]: 1201 },
+        M: { [Modes.Numeric]: 3693, [Modes.Alphanumeric]: 2238, [Modes.Byte]: 1538, [Modes.Kanji]: 947 },
+        Q: { [Modes.Numeric]: 2670, [Modes.Alphanumeric]: 1618, [Modes.Byte]: 1112, [Modes.Kanji]: 684 },
+        H: { [Modes.Numeric]: 2022, [Modes.Alphanumeric]: 1226, [Modes.Byte]: 842, [Modes.Kanji]: 518 },
+    },
+    33: {
+        L: { [Modes.Numeric]: 4965, [Modes.Alphanumeric]: 3009, [Modes.Byte]: 2068, [Modes.Kanji]: 1273 },
+        M: { [Modes.Numeric]: 3909, [Modes.Alphanumeric]: 2369, [Modes.Byte]: 1628, [Modes.Kanji]: 1002 },
+        Q: { [Modes.Numeric]: 2805, [Modes.Alphanumeric]: 1700, [Modes.Byte]: 1168, [Modes.Kanji]: 719 },
+        H: { [Modes.Numeric]: 2157, [Modes.Alphanumeric]: 1307, [Modes.Byte]: 898, [Modes.Kanji]: 553 },
+    },
+    34: {
+        L: { [Modes.Numeric]: 5253, [Modes.Alphanumeric]: 3183, [Modes.Byte]: 2188, [Modes.Kanji]: 1347 },
+        M: { [Modes.Numeric]: 4134, [Modes.Alphanumeric]: 2506, [Modes.Byte]: 1722, [Modes.Kanji]: 1060 },
+        Q: { [Modes.Numeric]: 2949, [Modes.Alphanumeric]: 1787, [Modes.Byte]: 1228, [Modes.Kanji]: 756 },
+        H: { [Modes.Numeric]: 2301, [Modes.Alphanumeric]: 1394, [Modes.Byte]: 958, [Modes.Kanji]: 590 },
+    },
+    35: {
+        L: { [Modes.Numeric]: 5529, [Modes.Alphanumeric]: 3351, [Modes.Byte]: 2303, [Modes.Kanji]: 1417 },
+        M: { [Modes.Numeric]: 4343, [Modes.Alphanumeric]: 2632, [Modes.Byte]: 1809, [Modes.Kanji]: 1113 },
+        Q: { [Modes.Numeric]: 3081, [Modes.Alphanumeric]: 1867, [Modes.Byte]: 1283, [Modes.Kanji]: 790 },
+        H: { [Modes.Numeric]: 2361, [Modes.Alphanumeric]: 1431, [Modes.Byte]: 983, [Modes.Kanji]: 605 },
+    },
+    36: {
+        L: { [Modes.Numeric]: 5836, [Modes.Alphanumeric]: 3537, [Modes.Byte]: 2431, [Modes.Kanji]: 1496 },
+        M: { [Modes.Numeric]: 4588, [Modes.Alphanumeric]: 2780, [Modes.Byte]: 1911, [Modes.Kanji]: 1176 },
+        Q: { [Modes.Numeric]: 3244, [Modes.Alphanumeric]: 1966, [Modes.Byte]: 1351, [Modes.Kanji]: 832 },
+        H: { [Modes.Numeric]: 2524, [Modes.Alphanumeric]: 1530, [Modes.Byte]: 1051, [Modes.Kanji]: 647 },
+    },
+    37: {
+        L: { [Modes.Numeric]: 6153, [Modes.Alphanumeric]: 3729, [Modes.Byte]: 2563, [Modes.Kanji]: 1577 },
+        M: { [Modes.Numeric]: 4775, [Modes.Alphanumeric]: 2894, [Modes.Byte]: 1989, [Modes.Kanji]: 1224 },
+        Q: { [Modes.Numeric]: 3417, [Modes.Alphanumeric]: 2071, [Modes.Byte]: 1423, [Modes.Kanji]: 876 },
+        H: { [Modes.Numeric]: 2625, [Modes.Alphanumeric]: 1591, [Modes.Byte]: 1093, [Modes.Kanji]: 673 },
+    },
+    38: {
+        L: { [Modes.Numeric]: 6479, [Modes.Alphanumeric]: 3927, [Modes.Byte]: 2699, [Modes.Kanji]: 1661 },
+        M: { [Modes.Numeric]: 5039, [Modes.Alphanumeric]: 3054, [Modes.Byte]: 2099, [Modes.Kanji]: 1292 },
+        Q: { [Modes.Numeric]: 3599, [Modes.Alphanumeric]: 2181, [Modes.Byte]: 1499, [Modes.Kanji]: 923 },
+        H: { [Modes.Numeric]: 2735, [Modes.Alphanumeric]: 1658, [Modes.Byte]: 1139, [Modes.Kanji]: 701 },
+    },
+    39: {
+        L: { [Modes.Numeric]: 6743, [Modes.Alphanumeric]: 4087, [Modes.Byte]: 2809, [Modes.Kanji]: 1729 },
+        M: { [Modes.Numeric]: 5313, [Modes.Alphanumeric]: 3220, [Modes.Byte]: 2213, [Modes.Kanji]: 1362 },
+        Q: { [Modes.Numeric]: 3791, [Modes.Alphanumeric]: 2298, [Modes.Byte]: 1579, [Modes.Kanji]: 972 },
+        H: { [Modes.Numeric]: 2927, [Modes.Alphanumeric]: 1774, [Modes.Byte]: 1219, [Modes.Kanji]: 750 },
+    },
+    40: {
+        L: { [Modes.Numeric]: 7089, [Modes.Alphanumeric]: 4296, [Modes.Byte]: 2953, [Modes.Kanji]: 1817 },
+        M: { [Modes.Numeric]: 5596, [Modes.Alphanumeric]: 3391, [Modes.Byte]: 2331, [Modes.Kanji]: 1435 },
+        Q: { [Modes.Numeric]: 3993, [Modes.Alphanumeric]: 2420, [Modes.Byte]: 1663, [Modes.Kanji]: 1024 },
+        H: { [Modes.Numeric]: 3057, [Modes.Alphanumeric]: 1852, [Modes.Byte]: 1273, [Modes.Kanji]: 784 },
+    },
+};
+
+/**
+ * QR Code Error Correction Table
+ * Defines codewords, error correction codewords, groups and blocks structure
+ * for each QR version and error correction level.
+*/
+
+const EC: ErrorCorrectionTable = {
+    1: {
+        L: { codewords: 19, ecCodewords: 7, groups: [{ blocks: 1, dataCodewords: 19 }] },
+        M: { codewords: 16, ecCodewords: 10, groups: [{ blocks: 1, dataCodewords: 16 }] },
+        Q: { codewords: 13, ecCodewords: 13, groups: [{ blocks: 1, dataCodewords: 13 }] },
+        H: { codewords: 9, ecCodewords: 17, groups: [{ blocks: 1, dataCodewords: 9 }] }
+    },
+    2: {
+        L: { codewords: 34, ecCodewords: 10, groups: [{ blocks: 1, dataCodewords: 34 }] },
+        M: { codewords: 28, ecCodewords: 16, groups: [{ blocks: 1, dataCodewords: 28 }] },
+        Q: { codewords: 22, ecCodewords: 22, groups: [{ blocks: 1, dataCodewords: 22 }] },
+        H: { codewords: 16, ecCodewords: 28, groups: [{ blocks: 1, dataCodewords: 16 }] }
+    },
+    3: {
+        L: { codewords: 55, ecCodewords: 15, groups: [{ blocks: 1, dataCodewords: 55 }] },
+        M: { codewords: 44, ecCodewords: 26, groups: [{ blocks: 1, dataCodewords: 44 }] },
+        Q: { codewords: 34, ecCodewords: 18, groups: [{ blocks: 2, dataCodewords: 17 }] },
+        H: { codewords: 26, ecCodewords: 22, groups: [{ blocks: 2, dataCodewords: 13 }] }
+    },
+    4: {
+        L: { codewords: 80, ecCodewords: 20, groups: [{ blocks: 1, dataCodewords: 80 }] },
+        M: { codewords: 64, ecCodewords: 18, groups: [{ blocks: 2, dataCodewords: 32 }] },
+        Q: { codewords: 48, ecCodewords: 26, groups: [{ blocks: 2, dataCodewords: 24 }] },
+        H: { codewords: 36, ecCodewords: 16, groups: [{ blocks: 4, dataCodewords: 9 }] }
+    },
+    5: {
+        L: { codewords: 108, ecCodewords: 26, groups: [{ blocks: 1, dataCodewords: 108 }] },
+        M: { codewords: 86, ecCodewords: 24, groups: [{ blocks: 2, dataCodewords: 43 }] },
+        Q: { codewords: 62, ecCodewords: 18, groups: [{ blocks: 2, dataCodewords: 15 }, { blocks: 2, dataCodewords: 16 }] },
+        H: { codewords: 46, ecCodewords: 22, groups: [{ blocks: 2, dataCodewords: 11 }, { blocks: 2, dataCodewords: 12 }] }
+    },
+    6: {
+        L: { codewords: 136, ecCodewords: 18, groups: [{ blocks: 2, dataCodewords: 68 }] },
+        M: { codewords: 108, ecCodewords: 16, groups: [{ blocks: 4, dataCodewords: 27 }] },
+        Q: { codewords: 76, ecCodewords: 24, groups: [{ blocks: 4, dataCodewords: 19 }] },
+        H: { codewords: 60, ecCodewords: 28, groups: [{ blocks: 4, dataCodewords: 15 }] }
+    },
+    7: {
+        L: { codewords: 156, ecCodewords: 20, groups: [{ blocks: 2, dataCodewords: 78 }] },
+        M: { codewords: 124, ecCodewords: 18, groups: [{ blocks: 4, dataCodewords: 31 }] },
+        Q: { codewords: 88, ecCodewords: 18, groups: [{ blocks: 2, dataCodewords: 14 }, { blocks: 4, dataCodewords: 15 }] },
+        H: { codewords: 66, ecCodewords: 26, groups: [{ blocks: 4, dataCodewords: 13 }, { blocks: 1, dataCodewords: 14 }] }
+    },
+    8: {
+        L: { codewords: 194, ecCodewords: 24, groups: [{ blocks: 2, dataCodewords: 97 }] },
+        M: { codewords: 154, ecCodewords: 22, groups: [{ blocks: 2, dataCodewords: 38 }, { blocks: 2, dataCodewords: 39 }] },
+        Q: { codewords: 110, ecCodewords: 22, groups: [{ blocks: 4, dataCodewords: 18 }, { blocks: 2, dataCodewords: 19 }] },
+        H: { codewords: 86, ecCodewords: 26, groups: [{ blocks: 4, dataCodewords: 14 }, { blocks: 2, dataCodewords: 15 }] }
+    },
+    9: {
+        L: { codewords: 232, ecCodewords: 30, groups: [{ blocks: 2, dataCodewords: 116 }] },
+        M: { codewords: 182, ecCodewords: 22, groups: [{ blocks: 3, dataCodewords: 36 }, { blocks: 2, dataCodewords: 37 }] },
+        Q: { codewords: 132, ecCodewords: 20, groups: [{ blocks: 4, dataCodewords: 16 }, { blocks: 4, dataCodewords: 17 }] },
+        H: { codewords: 100, ecCodewords: 24, groups: [{ blocks: 4, dataCodewords: 12 }, { blocks: 4, dataCodewords: 13 }] }
+    },
+    10: {
+        L: { codewords: 274, ecCodewords: 18, groups: [{ blocks: 2, dataCodewords: 68 }, { blocks: 2, dataCodewords: 69 }] },
+        M: { codewords: 216, ecCodewords: 26, groups: [{ blocks: 4, dataCodewords: 43 }, { blocks: 1, dataCodewords: 44 }] },
+        Q: { codewords: 154, ecCodewords: 24, groups: [{ blocks: 6, dataCodewords: 19 }, { blocks: 2, dataCodewords: 20 }] },
+        H: { codewords: 122, ecCodewords: 28, groups: [{ blocks: 6, dataCodewords: 15 }, { blocks: 2, dataCodewords: 16 }] }
+    },
+    // Versions 11-20
+    11: {
+        L: { codewords: 324, ecCodewords: 20, groups: [{ blocks: 4, dataCodewords: 81 }] },
+        M: { codewords: 254, ecCodewords: 30, groups: [{ blocks: 1, dataCodewords: 50 }, { blocks: 4, dataCodewords: 51 }] },
+        Q: { codewords: 180, ecCodewords: 28, groups: [{ blocks: 4, dataCodewords: 22 }, { blocks: 4, dataCodewords: 23 }] },
+        H: { codewords: 140, ecCodewords: 24, groups: [{ blocks: 3, dataCodewords: 12 }, { blocks: 8, dataCodewords: 13 }] }
+    },
+    12: {
+        L: { codewords: 370, ecCodewords: 24, groups: [{ blocks: 2, dataCodewords: 92 }, { blocks: 2, dataCodewords: 93 }] },
+        M: { codewords: 290, ecCodewords: 22, groups: [{ blocks: 6, dataCodewords: 36 }, { blocks: 2, dataCodewords: 37 }] },
+        Q: { codewords: 206, ecCodewords: 26, groups: [{ blocks: 4, dataCodewords: 20 }, { blocks: 6, dataCodewords: 21 }] },
+        H: { codewords: 158, ecCodewords: 28, groups: [{ blocks: 7, dataCodewords: 14 }, { blocks: 4, dataCodewords: 15 }] }
+    },
+    13: {
+        L: { codewords: 428, ecCodewords: 26, groups: [{ blocks: 4, dataCodewords: 107 }] },
+        M: { codewords: 334, ecCodewords: 22, groups: [{ blocks: 8, dataCodewords: 37 }, { blocks: 1, dataCodewords: 38 }] },
+        Q: { codewords: 244, ecCodewords: 24, groups: [{ blocks: 8, dataCodewords: 20 }, { blocks: 4, dataCodewords: 21 }] },
+        H: { codewords: 180, ecCodewords: 22, groups: [{ blocks: 12, dataCodewords: 11 }, { blocks: 4, dataCodewords: 12 }] }
+    },
+    14: {
+        L: { codewords: 461, ecCodewords: 30, groups: [{ blocks: 3, dataCodewords: 115 }, { blocks: 1, dataCodewords: 116 }] },
+        M: { codewords: 365, ecCodewords: 24, groups: [{ blocks: 4, dataCodewords: 40 }, { blocks: 5, dataCodewords: 41 }] },
+        Q: { codewords: 261, ecCodewords: 20, groups: [{ blocks: 11, dataCodewords: 16 }, { blocks: 5, dataCodewords: 17 }] },
+        H: { codewords: 197, ecCodewords: 24, groups: [{ blocks: 11, dataCodewords: 12 }, { blocks: 5, dataCodewords: 13 }] }
+    },
+    15: {
+        L: { codewords: 523, ecCodewords: 22, groups: [{ blocks: 5, dataCodewords: 87 }, { blocks: 1, dataCodewords: 88 }] },
+        M: { codewords: 415, ecCodewords: 24, groups: [{ blocks: 5, dataCodewords: 41 }, { blocks: 5, dataCodewords: 42 }] },
+        Q: { codewords: 295, ecCodewords: 30, groups: [{ blocks: 5, dataCodewords: 24 }, { blocks: 7, dataCodewords: 25 }] },
+        H: { codewords: 223, ecCodewords: 24, groups: [{ blocks: 11, dataCodewords: 12 }, { blocks: 7, dataCodewords: 13 }] }
+    },
+    16: {
+        L: { codewords: 589, ecCodewords: 24, groups: [{ blocks: 5, dataCodewords: 98 }, { blocks: 1, dataCodewords: 99 }] },
+        M: { codewords: 453, ecCodewords: 28, groups: [{ blocks: 7, dataCodewords: 45 }, { blocks: 3, dataCodewords: 46 }] },
+        Q: { codewords: 325, ecCodewords: 24, groups: [{ blocks: 15, dataCodewords: 19 }, { blocks: 2, dataCodewords: 20 }] },
+        H: { codewords: 253, ecCodewords: 30, groups: [{ blocks: 3, dataCodewords: 15 }, { blocks: 13, dataCodewords: 16 }] }
+    },
+    17: {
+        L: { codewords: 647, ecCodewords: 28, groups: [{ blocks: 1, dataCodewords: 107 }, { blocks: 5, dataCodewords: 108 }] },
+        M: { codewords: 507, ecCodewords: 28, groups: [{ blocks: 10, dataCodewords: 46 }, { blocks: 1, dataCodewords: 47 }] },
+        Q: { codewords: 367, ecCodewords: 28, groups: [{ blocks: 1, dataCodewords: 22 }, { blocks: 15, dataCodewords: 23 }] },
+        H: { codewords: 283, ecCodewords: 28, groups: [{ blocks: 2, dataCodewords: 14 }, { blocks: 17, dataCodewords: 15 }] }
+    },
+    18: {
+        L: { codewords: 721, ecCodewords: 30, groups: [{ blocks: 5, dataCodewords: 120 }, { blocks: 1, dataCodewords: 121 }] },
+        M: { codewords: 563, ecCodewords: 26, groups: [{ blocks: 9, dataCodewords: 43 }, { blocks: 4, dataCodewords: 44 }] },
+        Q: { codewords: 397, ecCodewords: 28, groups: [{ blocks: 17, dataCodewords: 22 }, { blocks: 1, dataCodewords: 23 }] },
+        H: { codewords: 313, ecCodewords: 28, groups: [{ blocks: 2, dataCodewords: 14 }, { blocks: 19, dataCodewords: 15 }] }
+    },
+    19: {
+        L: { codewords: 795, ecCodewords: 28, groups: [{ blocks: 3, dataCodewords: 113 }, { blocks: 4, dataCodewords: 114 }] },
+        M: { codewords: 627, ecCodewords: 26, groups: [{ blocks: 3, dataCodewords: 44 }, { blocks: 11, dataCodewords: 45 }] },
+        Q: { codewords: 445, ecCodewords: 26, groups: [{ blocks: 17, dataCodewords: 21 }, { blocks: 4, dataCodewords: 22 }] },
+        H: { codewords: 341, ecCodewords: 26, groups: [{ blocks: 9, dataCodewords: 13 }, { blocks: 16, dataCodewords: 14 }] }
+    },
+    20: {
+        L: { codewords: 861, ecCodewords: 28, groups: [{ blocks: 3, dataCodewords: 107 }, { blocks: 5, dataCodewords: 108 }] },
+        M: { codewords: 669, ecCodewords: 26, groups: [{ blocks: 3, dataCodewords: 41 }, { blocks: 13, dataCodewords: 42 }] },
+        Q: { codewords: 485, ecCodewords: 30, groups: [{ blocks: 15, dataCodewords: 24 }, { blocks: 5, dataCodewords: 25 }] },
+        H: { codewords: 385, ecCodewords: 28, groups: [{ blocks: 15, dataCodewords: 15 }, { blocks: 10, dataCodewords: 16 }] }
+    },
+    // Versions 21-30
+    21: {
+        L: { codewords: 932, ecCodewords: 28, groups: [{ blocks: 4, dataCodewords: 116 }, { blocks: 4, dataCodewords: 117 }] },
+        M: { codewords: 714, ecCodewords: 26, groups: [{ blocks: 17, dataCodewords: 42 }] },
+        Q: { codewords: 512, ecCodewords: 28, groups: [{ blocks: 17, dataCodewords: 22 }, { blocks: 6, dataCodewords: 23 }] },
+        H: { codewords: 406, ecCodewords: 30, groups: [{ blocks: 19, dataCodewords: 16 }, { blocks: 6, dataCodewords: 17 }] }
+    },
+    22: {
+        L: { codewords: 1006, ecCodewords: 28, groups: [{ blocks: 2, dataCodewords: 111 }, { blocks: 7, dataCodewords: 112 }] },
+        M: { codewords: 782, ecCodewords: 28, groups: [{ blocks: 17, dataCodewords: 46 }] },
+        Q: { codewords: 568, ecCodewords: 30, groups: [{ blocks: 7, dataCodewords: 24 }, { blocks: 16, dataCodewords: 25 }] },
+        H: { codewords: 442, ecCodewords: 24, groups: [{ blocks: 34, dataCodewords: 13 }] }
+    },
+    23: {
+        L: { codewords: 1094, ecCodewords: 30, groups: [{ blocks: 4, dataCodewords: 121 }, { blocks: 5, dataCodewords: 122 }] },
+        M: { codewords: 860, ecCodewords: 28, groups: [{ blocks: 4, dataCodewords: 47 }, { blocks: 14, dataCodewords: 48 }] },
+        Q: { codewords: 614, ecCodewords: 30, groups: [{ blocks: 11, dataCodewords: 24 }, { blocks: 14, dataCodewords: 25 }] },
+        H: { codewords: 464, ecCodewords: 30, groups: [{ blocks: 16, dataCodewords: 15 }, { blocks: 14, dataCodewords: 16 }] }
+    },
+    24: {
+        L: { codewords: 1174, ecCodewords: 30, groups: [{ blocks: 6, dataCodewords: 117 }, { blocks: 4, dataCodewords: 118 }] },
+        M: { codewords: 914, ecCodewords: 28, groups: [{ blocks: 6, dataCodewords: 45 }, { blocks: 14, dataCodewords: 46 }] },
+        Q: { codewords: 664, ecCodewords: 30, groups: [{ blocks: 11, dataCodewords: 24 }, { blocks: 16, dataCodewords: 25 }] },
+        H: { codewords: 514, ecCodewords: 30, groups: [{ blocks: 30, dataCodewords: 16 }, { blocks: 2, dataCodewords: 17 }] }
+    },
+    25: {
+        L: { codewords: 1276, ecCodewords: 26, groups: [{ blocks: 8, dataCodewords: 106 }, { blocks: 4, dataCodewords: 107 }] },
+        M: { codewords: 1000, ecCodewords: 28, groups: [{ blocks: 8, dataCodewords: 47 }, { blocks: 13, dataCodewords: 48 }] },
+        Q: { codewords: 718, ecCodewords: 30, groups: [{ blocks: 7, dataCodewords: 24 }, { blocks: 22, dataCodewords: 25 }] },
+        H: { codewords: 538, ecCodewords: 30, groups: [{ blocks: 22, dataCodewords: 15 }, { blocks: 13, dataCodewords: 16 }] }
+    },
+    26: {
+        L: { codewords: 1370, ecCodewords: 28, groups: [{ blocks: 10, dataCodewords: 114 }, { blocks: 2, dataCodewords: 115 }] },
+        M: { codewords: 1062, ecCodewords: 28, groups: [{ blocks: 19, dataCodewords: 46 }, { blocks: 4, dataCodewords: 47 }] },
+        Q: { codewords: 754, ecCodewords: 28, groups: [{ blocks: 28, dataCodewords: 22 }, { blocks: 6, dataCodewords: 23 }] },
+        H: { codewords: 596, ecCodewords: 30, groups: [{ blocks: 33, dataCodewords: 16 }, { blocks: 4, dataCodewords: 17 }] }
+    },
+    27: {
+        L: { codewords: 1468, ecCodewords: 30, groups: [{ blocks: 8, dataCodewords: 122 }, { blocks: 4, dataCodewords: 123 }] },
+        M: { codewords: 1128, ecCodewords: 28, groups: [{ blocks: 22, dataCodewords: 45 }, { blocks: 3, dataCodewords: 46 }] },
+        Q: { codewords: 808, ecCodewords: 30, groups: [{ blocks: 8, dataCodewords: 23 }, { blocks: 26, dataCodewords: 24 }] },
+        H: { codewords: 628, ecCodewords: 30, groups: [{ blocks: 12, dataCodewords: 15 }, { blocks: 28, dataCodewords: 16 }] }
+    },
+    28: {
+        L: { codewords: 1531, ecCodewords: 30, groups: [{ blocks: 3, dataCodewords: 117 }, { blocks: 10, dataCodewords: 118 }] },
+        M: { codewords: 1193, ecCodewords: 28, groups: [{ blocks: 3, dataCodewords: 45 }, { blocks: 23, dataCodewords: 46 }] },
+        Q: { codewords: 871, ecCodewords: 30, groups: [{ blocks: 4, dataCodewords: 24 }, { blocks: 31, dataCodewords: 25 }] },
+        H: { codewords: 661, ecCodewords: 30, groups: [{ blocks: 11, dataCodewords: 15 }, { blocks: 31, dataCodewords: 16 }] }
+    },
+    29: {
+        L: { codewords: 1631, ecCodewords: 30, groups: [{ blocks: 7, dataCodewords: 116 }, { blocks: 7, dataCodewords: 117 }] },
+        M: { codewords: 1267, ecCodewords: 28, groups: [{ blocks: 21, dataCodewords: 45 }, { blocks: 7, dataCodewords: 46 }] },
+        Q: { codewords: 911, ecCodewords: 30, groups: [{ blocks: 1, dataCodewords: 23 }, { blocks: 37, dataCodewords: 24 }] },
+        H: { codewords: 701, ecCodewords: 30, groups: [{ blocks: 19, dataCodewords: 15 }, { blocks: 26, dataCodewords: 16 }] }
+    },
+    30: {
+        L: { codewords: 1735, ecCodewords: 30, groups: [{ blocks: 5, dataCodewords: 115 }, { blocks: 10, dataCodewords: 116 }] },
+        M: { codewords: 1373, ecCodewords: 28, groups: [{ blocks: 19, dataCodewords: 47 }, { blocks: 10, dataCodewords: 48 }] },
+        Q: { codewords: 985, ecCodewords: 30, groups: [{ blocks: 15, dataCodewords: 24 }, { blocks: 25, dataCodewords: 25 }] },
+        H: { codewords: 745, ecCodewords: 30, groups: [{ blocks: 23, dataCodewords: 15 }, { blocks: 25, dataCodewords: 16 }] }
+    },
+    // Versions 31-40
+    31: {
+        L: { codewords: 1843, ecCodewords: 30, groups: [{ blocks: 13, dataCodewords: 115 }, { blocks: 3, dataCodewords: 116 }] },
+        M: { codewords: 1455, ecCodewords: 28, groups: [{ blocks: 2, dataCodewords: 46 }, { blocks: 29, dataCodewords: 47 }] },
+        Q: { codewords: 1033, ecCodewords: 30, groups: [{ blocks: 42, dataCodewords: 24 }, { blocks: 1, dataCodewords: 25 }] },
+        H: { codewords: 793, ecCodewords: 30, groups: [{ blocks: 23, dataCodewords: 15 }, { blocks: 28, dataCodewords: 16 }] }
+    },
+    32: {
+        L: { codewords: 1955, ecCodewords: 30, groups: [{ blocks: 17, dataCodewords: 115 }] },
+        M: { codewords: 1541, ecCodewords: 28, groups: [{ blocks: 10, dataCodewords: 46 }, { blocks: 23, dataCodewords: 47 }] },
+        Q: { codewords: 1115, ecCodewords: 30, groups: [{ blocks: 10, dataCodewords: 24 }, { blocks: 35, dataCodewords: 25 }] },
+        H: { codewords: 845, ecCodewords: 30, groups: [{ blocks: 19, dataCodewords: 15 }, { blocks: 35, dataCodewords: 16 }] }
+    },
+    33: {
+        L: { codewords: 2071, ecCodewords: 30, groups: [{ blocks: 17, dataCodewords: 115 }, { blocks: 1, dataCodewords: 116 }] },
+        M: { codewords: 1631, ecCodewords: 28, groups: [{ blocks: 14, dataCodewords: 46 }, { blocks: 21, dataCodewords: 47 }] },
+        Q: { codewords: 1171, ecCodewords: 30, groups: [{ blocks: 29, dataCodewords: 24 }, { blocks: 19, dataCodewords: 25 }] },
+        H: { codewords: 901, ecCodewords: 30, groups: [{ blocks: 11, dataCodewords: 15 }, { blocks: 46, dataCodewords: 16 }] }
+    },
+    34: {
+        L: { codewords: 2191, ecCodewords: 30, groups: [{ blocks: 13, dataCodewords: 115 }, { blocks: 6, dataCodewords: 116 }] },
+        M: { codewords: 1725, ecCodewords: 28, groups: [{ blocks: 14, dataCodewords: 46 }, { blocks: 23, dataCodewords: 47 }] },
+        Q: { codewords: 1231, ecCodewords: 30, groups: [{ blocks: 44, dataCodewords: 24 }, { blocks: 7, dataCodewords: 25 }] },
+        H: { codewords: 961, ecCodewords: 30, groups: [{ blocks: 59, dataCodewords: 16 }, { blocks: 1, dataCodewords: 17 }] }
+    },
+    35: {
+        L: { codewords: 2306, ecCodewords: 30, groups: [{ blocks: 12, dataCodewords: 121 }, { blocks: 7, dataCodewords: 122 }] },
+        M: { codewords: 1812, ecCodewords: 28, groups: [{ blocks: 12, dataCodewords: 47 }, { blocks: 26, dataCodewords: 48 }] },
+        Q: { codewords: 1286, ecCodewords: 30, groups: [{ blocks: 39, dataCodewords: 24 }, { blocks: 14, dataCodewords: 25 }] },
+        H: { codewords: 986, ecCodewords: 30, groups: [{ blocks: 22, dataCodewords: 15 }, { blocks: 41, dataCodewords: 16 }] }
+    },
+    36: {
+        L: { codewords: 2434, ecCodewords: 30, groups: [{ blocks: 6, dataCodewords: 121 }, { blocks: 14, dataCodewords: 122 }] },
+        M: { codewords: 1914, ecCodewords: 28, groups: [{ blocks: 6, dataCodewords: 47 }, { blocks: 34, dataCodewords: 48 }] },
+        Q: { codewords: 1354, ecCodewords: 30, groups: [{ blocks: 46, dataCodewords: 24 }, { blocks: 10, dataCodewords: 25 }] },
+        H: { codewords: 1054, ecCodewords: 30, groups: [{ blocks: 2, dataCodewords: 15 }, { blocks: 64, dataCodewords: 16 }] }
+    },
+    37: {
+        L: { codewords: 2566, ecCodewords: 30, groups: [{ blocks: 17, dataCodewords: 122 }, { blocks: 4, dataCodewords: 123 }] },
+        M: { codewords: 1992, ecCodewords: 28, groups: [{ blocks: 29, dataCodewords: 46 }, { blocks: 14, dataCodewords: 47 }] },
+        Q: { codewords: 1426, ecCodewords: 30, groups: [{ blocks: 49, dataCodewords: 24 }, { blocks: 10, dataCodewords: 25 }] },
+        H: { codewords: 1096, ecCodewords: 30, groups: [{ blocks: 24, dataCodewords: 15 }, { blocks: 46, dataCodewords: 16 }] }
+    },
+    38: {
+        L: { codewords: 2702, ecCodewords: 30, groups: [{ blocks: 4, dataCodewords: 122 }, { blocks: 18, dataCodewords: 123 }] },
+        M: { codewords: 2102, ecCodewords: 28, groups: [{ blocks: 13, dataCodewords: 46 }, { blocks: 32, dataCodewords: 47 }] },
+        Q: { codewords: 1502, ecCodewords: 30, groups: [{ blocks: 48, dataCodewords: 24 }, { blocks: 14, dataCodewords: 25 }] },
+        H: { codewords: 1142, ecCodewords: 30, groups: [{ blocks: 42, dataCodewords: 15 }, { blocks: 32, dataCodewords: 16 }] }
+    },
+    39: {
+        L: { codewords: 2812, ecCodewords: 30, groups: [{ blocks: 20, dataCodewords: 117 }, { blocks: 4, dataCodewords: 118 }] },
+        M: { codewords: 2216, ecCodewords: 28, groups: [{ blocks: 40, dataCodewords: 47 }, { blocks: 7, dataCodewords: 48 }] },
+        Q: { codewords: 1582, ecCodewords: 30, groups: [{ blocks: 43, dataCodewords: 24 }, { blocks: 22, dataCodewords: 25 }] },
+        H: { codewords: 1222, ecCodewords: 30, groups: [{ blocks: 10, dataCodewords: 15 }, { blocks: 67, dataCodewords: 16 }] }
+    },
+    40: {
+        L: { codewords: 2956, ecCodewords: 30, groups: [{ blocks: 19, dataCodewords: 118 }, { blocks: 6, dataCodewords: 119 }] },
+        M: { codewords: 2334, ecCodewords: 28, groups: [{ blocks: 18, dataCodewords: 47 }, { blocks: 31, dataCodewords: 48 }] },
+        Q: { codewords: 1666, ecCodewords: 30, groups: [{ blocks: 34, dataCodewords: 24 }, { blocks: 34, dataCodewords: 25 }] },
+        H: { codewords: 1276, ecCodewords: 30, groups: [{ blocks: 20, dataCodewords: 15 }, { blocks: 61, dataCodewords: 16 }] }
+    }
+};
 
 
 /**
@@ -6932,11 +7432,6 @@ const alpha: { [key: string]: number } = {
 };
 
 /**
- * A range of error correction levels used in QR codes.
-*/
-type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
-
-/**
  * A range of error correction levels in .
 */
 
@@ -6946,12 +7441,6 @@ enum ErrorCorrectionBits {
     Q = 3, // 11 in binary
     H = 2  // 10 in binary
 }
-
-/**
- * An array of error correction levels in order of increasing error correction capability.
- */
-
-const quality: ErrorCorrectionLevel[] = ["H", "Q", "M", "L"];
 
 /**
  * An array of the number of remainder bits for each QR code version.
@@ -6965,7 +7454,7 @@ const remainderBits: number[] = [0, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3,
  * A mapping of QR code versions to their corresponding alignment pattern anchor positions.
  */
 
-const ALIGNMENT_ANCHORS: { [version: number]: number[] } = {
+const alignments: { [version: number]: number[] } = {
     1: [],
     2: [6, 18],
     3: [6, 22],
@@ -7008,5 +7497,4 @@ const ALIGNMENT_ANCHORS: { [version: number]: number[] } = {
     40: [6, 30, 58, 86, 114, 142, 170]
 };
 
-export { Modes, range, alpha, quality, remainderBits, ALIGNMENT_ANCHORS, ErrorCorrectionBits };
-export type { ErrorCorrectionLevel };
+export { Modes, capacities, EC, range, alpha, remainderBits, alignments, ErrorCorrectionBits };

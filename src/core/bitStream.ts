@@ -1,45 +1,61 @@
-import { Codeword } from "./codeword.ts";
 import { Modes } from "./constants.ts";
+import type { Pack } from "../types/core.ts";
 
 /** 
 This function constructs the bit stream for a QR code segment. It takes the mode, character count, data bits, and the number of codewords to determine how to format the bit stream correctly. The function ensures that the bit stream is properly terminated, padded to byte boundaries, and filled with pad bytes if necessary to reach the required length for the QR code version being generated.
 */
 
-export function bitStream(mode: Modes, count: string, bits: string[], codeword: Codeword["codewords"]): string[] {
-    const bytes: string[] = [];
-    const PAD_BYTES = ['11101100', '00010001'];
-
+function bitStream(mode: Modes, count: Pack, data: Pack[], codeword: number): Uint8Array {
+    const bytes = new Uint8Array(codeword);
     const capacity = codeword * 8;
+    const PAD_BYTES = [236, 17];
 
-    let container = "";
-    container += mode.toString(2).padStart(4, '0');
-    container += count;
-    container += bits.join('');
+    let offset = 0;
 
-    // Terminator: up to 4 zero bits but don't exceed capacity
-    const terminator = Math.min(4, Math.max(0, capacity - container.length));
-    container += '0'.repeat(terminator);
+    const pack = (value: number, size: number) => {
+        for (let i = size - 1; i >= 0; i--) {
+            if (offset >= capacity) return;
 
-    // Pad to next byte boundary (but not beyond capacity)
-    if (container.length % 8 !== 0) {
-        const padBits = Math.min(8 - (container.length % 8), capacity - container.length);
-        container += '0'.repeat(padBits);
+            const bit = (value >> i) & 1;
+            if (bit === 1) {
+                const byteIdx = offset >> 3;
+                const bitOffset = 7 - (offset % 8);
+                bytes[byteIdx] |= (1 << bitOffset);
+            }
+            offset++;
+        }
+    };
+
+    // 1. Write Mode Indicator (4 bits)
+    pack(mode, 4);
+
+    // 2. Write Character Count Indicator
+    pack(count[0], count[1]);
+
+    // 3. Write Data Bits (The Fix)
+    // We iterate through the packs and use their specific sizes (10, 11, 13, etc.)
+    for (const [val, size] of data) {
+        pack(val, size);
     }
 
-    // If exceeded capacity (shouldn't normally happen), truncate
-    if (container.length > capacity) {
-        container = container.slice(0, capacity);
+    // 4. Terminator (Up to 4 zero bits)
+    const terminator = Math.min(4, capacity - offset);
+    offset += terminator;
+
+    // 5. Pad to next Byte Boundary
+    while (offset % 8 !== 0 && offset < capacity) {
+        offset++;
     }
 
-    // Add pad bytes until full
-    const remainingBytes = (capacity - container.length) / 8;
-    for (let i = 0; i < remainingBytes; i++) {
-        container += PAD_BYTES[i % 2];
-    }
-
-    for (let i = 0; i < capacity; i += 8) {
-        bytes.push(container.slice(i, i + 8));
+    // 6. Fill remaining capacity with PAD_BYTES
+    let toggle = 0;
+    while (offset + 8 <= capacity) {
+        bytes[offset >> 3] = PAD_BYTES[toggle % 2];
+        offset += 8;
+        toggle++;
     }
 
     return bytes;
 };
+
+export { bitStream };

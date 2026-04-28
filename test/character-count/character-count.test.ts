@@ -2,13 +2,14 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { characterCount } from "../../src/character-count/character-count.ts";
 import { Modes } from "../../src/core/constants.ts";
+import type { Pack } from "../../src/types/core.ts";
 
 /**
  * Helper to generate expected binary string
  */
 
-function expected(length: number, pad: number): string {
-  return length.toString(2).padStart(pad, "0");
+function expected(length: number, pad: number): Pack {
+  return [length, pad];
 }
 
 Deno.test("characterCount - valid cases", () => {
@@ -43,7 +44,7 @@ Deno.test("characterCount - valid cases", () => {
   }
 });
 
-Deno.test("characterCount - invalid versions", () => {
+Deno.test("characterCount - invalid versions and mode", () => {
   assertThrows(
     () => characterCount(0, Modes.Numeric, 5),
     Error,
@@ -55,5 +56,18 @@ Deno.test("characterCount - invalid versions", () => {
     Error,
     "Invalid version number"
   );
+
+  assertThrows(
+    () => characterCount(1, 0 as Modes, 5),
+    Error,
+    "Unsupported mode"
+  );
+
+  assertThrows(
+    () => characterCount(1, 10 as Modes, 5),
+    Error,
+    "Unsupported mode"
+  );
+
 });
 
